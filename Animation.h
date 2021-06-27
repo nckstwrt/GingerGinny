@@ -24,7 +24,7 @@ enum class ANIMATION
 class Animation
 {
 public:
-    Animation();
+    Animation(bool masterAnimation = false);
     ~Animation();
 
     void AddImage(int imageCount, int imageIndex, SDL_Surface* img, int imageDelay = 6);
@@ -32,8 +32,10 @@ public:
     void ResetAnimation();
     SDL_Surface* CurrentImage(bool facingRight = true);
     void SetAnimationDelay(int imageIndex, int delay);
+    void MakeMaster(bool isMaster = true);
 
 private:
+    bool masterAnimation;
     int currentImage;
     int currentFrame;
     int imageCount;

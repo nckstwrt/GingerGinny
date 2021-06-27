@@ -8,26 +8,17 @@ Monster::Monster() :
     targetY(-1),
     imgCurrentFrame(NULL),
     walking(false),
-    attacking(false),
-    deleteAnimations(true)
+    attacking(false)
 {
-}
-
-Monster::~Monster()
-{
-    if (deleteAnimations)
-    {
-        for (map<ANIMATION, Animation*>::iterator iter = animations.begin(); iter != animations.end(); iter++)
-        {
-            delete iter->second;
-        }
-    }
 }
 
 Monster::Monster(const Monster& monster)
 {
     *this = monster;
-    this->deleteAnimations = false;
+    for (map<ANIMATION, Animation>::iterator iter = this->animations.begin(); iter != this->animations.end(); iter++)
+    {
+        iter->second.MakeMaster(false);
+    }
 }
 
 Animation* Monster::AddAnimationImages(ANIMATION animationType, int imageCycleDelay, int imageCount, ...)
@@ -35,18 +26,19 @@ Animation* Monster::AddAnimationImages(ANIMATION animationType, int imageCycleDe
     va_list vl;
     va_start(vl, imageCount);
 
-    Animation *animation = new Animation();
+    Animation animation;
 
     for (int i = 0; i < imageCount; i++)
     {
-        animation->AddImage(imageCount, i, va_arg(vl, SDL_Surface*), imageCycleDelay);
+        animation.AddImage(imageCount, i, va_arg(vl, SDL_Surface*), imageCycleDelay);
     }
 
     animations[animationType] = animation;
+    animations[animationType].MakeMaster();
 
     va_end(vl);
 
-    return animation;
+    return &animations[animationType];
 }
 
 void Monster::Move(DIRECTION direction)
@@ -121,8 +113,8 @@ void Monster::Update()
 
     if (attacking)
     {
-        imgCurrentFrame = animations[ANIMATION::Attack]->CurrentImage(facingRight);
-        if (animations[ANIMATION::Attack]->Increment())
+        imgCurrentFrame = animations[ANIMATION::Attack].CurrentImage(facingRight);
+        if (animations[ANIMATION::Attack].Increment())
         {
             attacking = false;
         }
@@ -131,15 +123,17 @@ void Monster::Update()
     {
         if (walking)
         {
-            imgCurrentFrame = animations[ANIMATION::Walk]->CurrentImage(facingRight);
-            animations[ANIMATION::Walk]->Increment();
+            imgCurrentFrame = animations[ANIMATION::Walk].CurrentImage(facingRight);
+            animations[ANIMATION::Walk].Increment();
+            if (animations.find(ANIMATION::Idle) != animations.end())
+                animations[ANIMATION::Idle].ResetAnimation();
         }
         else
         {
-            imgCurrentFrame = animations[ANIMATION::Idle]->CurrentImage(facingRight);
-            animations[ANIMATION::Idle]->Increment();
+            imgCurrentFrame = animations[ANIMATION::Idle].CurrentImage(facingRight);
+            animations[ANIMATION::Idle].Increment();
             if (animations.find(ANIMATION::Walk) != animations.end())
-                animations[ANIMATION::Walk]->ResetAnimation();
+                animations[ANIMATION::Walk].ResetAnimation();
         }
     }
     walking = false;

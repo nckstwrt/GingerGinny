@@ -1,6 +1,7 @@
 #include "Animation.h"
 
-Animation::Animation() :
+Animation::Animation(bool masterAnimation) :
+    masterAnimation(masterAnimation),
     currentFrame(0),
     currentImage(0),
     imageCount(0),
@@ -12,16 +13,19 @@ Animation::Animation() :
 
 Animation::~Animation()
 {
- //   if (imagesRight)
-   //     delete[] imagesRight;
-    if (imagesLeft)
+    if (masterAnimation)
     {
-        for (int i = 0; i < imageCount; i++)
-            SDL_FreeSurface(imagesLeft[i]);
-        delete[] imagesLeft;
+        if (imagesRight)
+            delete[] imagesRight;
+        if (imagesLeft)
+        {
+            for (int i = 0; i < imageCount; i++)
+                SDL_FreeSurface(imagesLeft[i]);
+           delete[] imagesLeft;
+        }
+        if (animationDelays)
+            delete[] animationDelays;
     }
-    if (animationDelays)
-        delete[] animationDelays;
 }
 
 void Animation::AddImage(int imageCount, int imageIndex, SDL_Surface* img, int imageDelay)
@@ -70,4 +74,9 @@ SDL_Surface* Animation::CurrentImage(bool facingRight)
 void Animation::SetAnimationDelay(int imageIndex, int delay)
 {
     animationDelays[imageIndex] = delay;
+}
+
+void Animation::MakeMaster(bool isMaster)
+{
+    masterAnimation = isMaster;
 }
