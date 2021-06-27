@@ -49,10 +49,10 @@ int main(int argc, char* argv[])
     SDL_Surface* hw_surface = Game.GetSurface();
 
     Monster ginny;
-    Animation *idleAnim = ginny.AddAnimationImages(ANIMATION::Idle, 12, 2, Game.LoadImage("images/idle_000_small.png"), Game.LoadImage("images/idle_001_small.png"));
+    Animation *idleAnim = ginny.AddAnimationImages(ANIMATION::Idle, 12, 2, Game.LoadImage("images/idle_000_vsmall.png"), Game.LoadImage("images/idle_001_vsmall.png"));
     idleAnim->SetAnimationDelay(0, 200);
-    ginny.AddAnimationImages(ANIMATION::Walk, 6, 4, Game.LoadImage("images/walk_000_small.png"), Game.LoadImage("images/walk_001_small.png"), Game.LoadImage("images/walk_002_small.png"), Game.LoadImage("images/walk_003_small.png"));
-    ginny.AddAnimationImages(ANIMATION::Attack, 4, 5, Game.LoadImage("images/attack_000_small.png"), Game.LoadImage("images/attack_001_small.png"), Game.LoadImage("images/attack_002_small.png"), Game.LoadImage("images/attack_003_small.png"), Game.LoadImage("images/attack_004_small.png"));
+    ginny.AddAnimationImages(ANIMATION::Walk, 6, 4, Game.LoadImage("images/walk_000_vsmall.png"), Game.LoadImage("images/walk_001_vsmall.png"), Game.LoadImage("images/walk_002_vsmall.png"), Game.LoadImage("images/walk_003_vsmall.png"));
+    ginny.AddAnimationImages(ANIMATION::Attack, 4, 5, Game.LoadImage("images/attack_000_vsmall.png"), Game.LoadImage("images/attack_001_vsmall.png"), Game.LoadImage("images/attack_002_vsmall.png"), Game.LoadImage("images/attack_003_vsmall.png"), Game.LoadImage("images/attack_004_vsmall.png"));
     ginny.x = 0;
     ginny.y = 50;
 
@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
         World.Update();
         World.Draw(&Game);
 
-        if (Game.PollEvents().type == SDL_QUIT || Game.keys[SDLK_q])
+        if (Game.PollEvents().type == SDL_QUIT || Game.keys[SDLK_q] || Game.keys[SDLK_ESCAPE])
             break;
 
         if (Game.keys[SDLK_LEFT] || Game.keys[SDLK_l])
