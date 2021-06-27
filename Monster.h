@@ -12,6 +12,7 @@ class Monster
 public:
     Monster();
     ~Monster();
+    Monster(const Monster &monster);
 
     Animation* AddAnimationImages(ANIMATION animation, int imageCycleDelay, int imageCount, ...);
 
@@ -19,14 +20,15 @@ public:
     void Attack();
     void Update();
     SDL_Surface* GetCurrentFrame();
+    Monster Duplicate();
 
     int x;
     int y;
+    bool facingRight;
 
 private:
     SDL_Surface* imgCurrentFrame;
     map<ANIMATION, Animation*> animations;
-    bool facingRight;
     bool walking;
     bool attacking;
     bool deleteAnimations;

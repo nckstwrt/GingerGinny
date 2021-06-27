@@ -59,6 +59,8 @@ SDL_Surface* SDLGame::LoadImage(const char* szImageFile)
         ret = SDL_DisplayFormatAlpha(img);
         SDL_FreeSurface(img);
     }
+    else
+        printf("SDLGame::LoadImage - failed to load: %s\n", szImageFile);
 
     imageMap[szImageFile] = img;
 

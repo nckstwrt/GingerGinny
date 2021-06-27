@@ -2,10 +2,43 @@
 #include "SDLGame.h"
 #include "SDLColor.h"
 #include "Monster.h"
+#include <vector>
+using namespace std;
+
+class World
+{
+public:
+    void AddMonster(Monster newMonster, int x, int y, bool facingRight)
+    {
+        newMonster.x = x;
+        newMonster.y = y;
+        newMonster.facingRight = facingRight;
+        monsters.push_back(newMonster);
+    }
+
+    void Update()
+    {
+        for (vector<Monster>::iterator iter = monsters.begin(); iter != monsters.end(); iter++)
+        {
+            iter->Update();
+        }
+    }
+
+    void Draw(SDLGame *game)
+    {
+        for (vector<Monster>::iterator iter = monsters.begin(); iter != monsters.end(); iter++)
+        {
+            game->BlitImage(iter->GetCurrentFrame(), iter->x, iter->y);
+        }
+    }
+
+    vector<Monster> monsters;
+};
 
 int main(int argc, char* argv[])
 {
     SDLGame Game;
+    World World;
 
     Game.SetupScreen(240, 240, false);
 
@@ -18,6 +51,17 @@ int main(int argc, char* argv[])
     ginny.AddAnimationImages(ANIMATION::Attack, 4, 5, Game.LoadImage("images/attack_000_small.png"), Game.LoadImage("images/attack_001_small.png"), Game.LoadImage("images/attack_002_small.png"), Game.LoadImage("images/attack_003_small.png"), Game.LoadImage("images/attack_004_small.png"));
     ginny.x = 0;
     ginny.y = 50;
+
+    Monster ogre;
+    ogre.AddAnimationImages(ANIMATION::Idle, 10, 4, Game.LoadImage("images/DungeonTilesetII_v1.4/ogre_idle_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/ogre_idle_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/ogre_idle_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/ogre_idle_anim_f3.png"));
+
+    Monster demon;
+    demon.AddAnimationImages(ANIMATION::Idle, 10, 4, Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_idle_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_idle_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_idle_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_idle_anim_f3.png"));
+
+    World.AddMonster(ogre, 50, 90, true);
+    World.AddMonster(ogre, 180, 110, false);
+    World.AddMonster(demon, 30, 150, true);
+    World.AddMonster(demon, 110, 190, false);
 
     SDL_Surface* floor1 = Game.LoadImage("images/DungeonTilesetII_v1.4/floor_1.png");
 
@@ -45,6 +89,9 @@ int main(int argc, char* argv[])
         }
 
         Game.BlitImage(textSurface, 0, 0);
+
+        World.Update();
+        World.Draw(&Game);
 
         if (Game.PollEvents().type == SDL_QUIT || Game.keys[SDLK_q])
             break;

@@ -2,8 +2,8 @@
 
 Monster::Monster() :
     x(0), y(0),
-    imgCurrentFrame(NULL),
     facingRight(true),
+    imgCurrentFrame(NULL),
     walking(false),
     attacking(false),
     deleteAnimations(true)
@@ -19,6 +19,12 @@ Monster::~Monster()
             delete iter->second;
         }
     }
+}
+
+Monster::Monster(const Monster& monster)
+{
+    *this = monster;
+    this->deleteAnimations = false;
 }
 
 Animation* Monster::AddAnimationImages(ANIMATION animationType, int imageCycleDelay, int imageCount, ...)
@@ -91,7 +97,8 @@ void Monster::Update()
         {
             imgCurrentFrame = animations[ANIMATION::Idle]->CurrentImage(facingRight);
             animations[ANIMATION::Idle]->Increment();
-            animations[ANIMATION::Walk]->ResetAnimation();
+            if (animations.find(ANIMATION::Walk) != animations.end())
+                animations[ANIMATION::Walk]->ResetAnimation();
         }
     }
     walking = false;
@@ -101,3 +108,4 @@ SDL_Surface* Monster::GetCurrentFrame()
 {
     return imgCurrentFrame;
 }
+
