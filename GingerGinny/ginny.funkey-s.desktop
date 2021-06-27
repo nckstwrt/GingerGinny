@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Ginger Ginny
+Comment=Teenage Mutant Ginger Ginny
+Exec=GingerGinny.elf
+Icon=ginny
+Terminal=false
+Categories=applications;

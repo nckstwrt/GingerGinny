@@ -1,0 +1,2 @@
+c:\development\GingerGinny\Debug\GingerGinny.exe
+c:\development\GingerGinny\Debug\GingerGinny.pdb
