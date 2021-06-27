@@ -1,3 +1,6 @@
+#ifndef _SDLCOLOR_H
+#define _SDLCOLOR_H
+
 #include <SDL/SDL.h>
 
 class SDLColor
@@ -13,3 +16,5 @@ public:
 
     SDL_Color color;
 };
+
+#endif

@@ -1,5 +1,6 @@
 #include "SDLGame.h"
 #include "SDLColor.h"
+#include "Monster.h"
 
 int main(int argc, char* argv[])
 {
@@ -9,10 +10,13 @@ int main(int argc, char* argv[])
 
     SDL_Surface* hw_surface = Game.GetSurface();
 
-    SDL_Surface* img = Game.LoadImage("images/idle_000_small.png");
-    SDL_Surface* tileset = Game.LoadImage("images/16x16Tileset.png");
+    Monster ginny;
+    ginny.SetStillImage(Game.LoadImage("images/idle_000_small.png"));
+    ginny.AddWalkImages(4, Game.LoadImage("images/walk_000_small.png"), Game.LoadImage("images/walk_001_small.png"), Game.LoadImage("images/walk_002_small.png"), Game.LoadImage("images/walk_003_small.png"));
+    ginny.x = 0;
+    ginny.y = 50;
 
-    SDL_Surface* img2 = rotozoomSurfaceXY(img, 0, -1, 1, SMOOTHING_OFF);
+    SDL_Surface* floor1 = Game.LoadImage("images/DungeonTilesetII_v1.4/floor_1.png");
 
     TTF_Font* ParryHotter = Game.LoadFont("fonts/ParryHotter.ttf", 48);
 
@@ -21,11 +25,10 @@ int main(int argc, char* argv[])
     int x = 0;
     int y = 50;
     bool facingRight = true;
+    int walkingFrame = 0;
+    bool walking = false;
     while (true)
     {
-        if (x > 240 - 100)
-            x = 0;
-
         Game.ClearScreen();
 
         /*
@@ -35,39 +38,39 @@ int main(int argc, char* argv[])
         SDL_FillRect(hw_surface, &draw_rect, color);
         */
 
-        for (int y = 0; y < 9; y++)
+        for (int y = 0; y < 15; y++)
         {
-            for (int x = 0; x < 9; x++)
+            for (int x = 0; x < 15; x++)
             {
-                Game.BlitImage(tileset, 534, 278, 36, 35, x*36, y*35);
+                Game.BlitImage(floor1, 0, 0, 16, 16, x*16, y*16);
             }
         }
 
         Game.BlitImage(textSurface, 0, 0);
 
-        Game.BlitImage(facingRight ? img : img2, x, y);
-
         if (Game.PollEvents().type == SDL_QUIT || Game.keys[SDLK_q])
             break;
 
+        walking = false;
         if (Game.keys[SDLK_LEFT] || Game.keys[SDLK_l])
         {
-            facingRight = false;
-            x -= 1;
+            ginny.Move(Left);
         }
         if (Game.keys[SDLK_RIGHT] || Game.keys[SDLK_r])
         {
-            facingRight = true;
-            x += 1;
+            ginny.Move(Right);
         }
         if (Game.keys[SDLK_UP] || Game.keys[SDLK_u])
         {
-            y -= 1;
+            ginny.Move(Up);
         }
         if (Game.keys[SDLK_DOWN] || Game.keys[SDLK_d])
         {
-            y += 1;
+            ginny.Move(Down);
         }
+
+        ginny.Update();
+        Game.BlitImage(ginny.GetCurrentFrame(), ginny.x, ginny.y);
 
         // Switch buffers to show the square we just drew
         Game.FlipScreen();

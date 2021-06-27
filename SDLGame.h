@@ -1,8 +1,14 @@
+#ifndef _SDLGAME_H
+#define _SDLGAME_H
+
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_framerate.h>
 #include <SDL/SDL_rotozoom.h>
 #include <SDL/SDL_ttf.h>
+#include <map>
+#include <string>
+using namespace std;
 
 class SDLGame
 {
@@ -15,6 +21,7 @@ public:
     void FlipScreen();
     SDL_Event PollEvents();
     SDL_Surface* LoadImage(const char* szImageFile);
+    void FreeImage(const char* szImageFile);
     void BlitImage(SDL_Surface* img, int x, int y);
     void BlitImage(SDL_Surface* img, int srcX, int srcY, int w, int h, int x, int y);
     void DrawRect(int x, int y, int width, int height, Uint8 r, Uint8 g, Uint8 b);
@@ -27,6 +34,7 @@ public:
 private:
     SDL_Surface* hw_surface;
     FPSmanager fpsManager;
+    map<string, SDL_Surface*> imageMap;
 };
 
 /*
@@ -47,3 +55,5 @@ MAP X        TO KEY     KEY_X
 MAP Y        TO KEY     KEY_Y
 MAP MENU     TO KEY     KEY_Q
 */
+
+#endif

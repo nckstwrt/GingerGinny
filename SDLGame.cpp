@@ -58,7 +58,20 @@ SDL_Surface* SDLGame::LoadImage(const char* szImageFile)
         ret = SDL_DisplayFormatAlpha(img);
         SDL_FreeSurface(img);
     }
+
+    imageMap[szImageFile] = img;
+
     return ret;
+}
+
+void SDLGame::FreeImage(const char* szImageFile)
+{
+    map<string,SDL_Surface*>::iterator iter = imageMap.find(szImageFile);
+    if (iter != imageMap.end())
+    {
+        SDL_FreeSurface(iter->second);
+        imageMap.erase(iter);
+    }
 }
 
 void SDLGame::BlitImage(SDL_Surface* img, int x, int y)
