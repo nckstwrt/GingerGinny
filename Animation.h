@@ -14,7 +14,7 @@ enum class DIRECTION
 
 enum class ANIMATION
 {
-    None,
+    Idle,
     Walk,
     Run,
     Jump,
@@ -24,22 +24,22 @@ enum class ANIMATION
 class Animation
 {
 public:
-    Animation(int imageCycleDelay = 6);
+    Animation();
     ~Animation();
 
-    void AddImages(int imageCount, ...);
-    void AddImage(int imageCount, int imageIndex, SDL_Surface* img);
-
+    void AddImage(int imageCount, int imageIndex, SDL_Surface* img, int imageDelay = 6);
     bool Increment();
     void ResetAnimation();
-    SDL_Surface* CurrentFrame(bool facingRight = true);
+    SDL_Surface* CurrentImage(bool facingRight = true);
+    void SetAnimationDelay(int imageIndex, int delay);
 
 private:
+    int currentImage;
     int currentFrame;
     int imageCount;
-    int imageCycleDelay;
     SDL_Surface** imagesRight;
     SDL_Surface** imagesLeft;
+    int* animationDelays;
 };
 
 #endif

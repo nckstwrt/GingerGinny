@@ -12,7 +12,8 @@ int main(int argc, char* argv[])
     SDL_Surface* hw_surface = Game.GetSurface();
 
     Monster ginny;
-    ginny.SetStillImage(Game.LoadImage("images/idle_000_small.png"));
+    Animation *idleAnim = ginny.AddAnimationImages(ANIMATION::Idle, 12, 2, Game.LoadImage("images/idle_000_small.png"), Game.LoadImage("images/idle_001_small.png"));
+    idleAnim->SetAnimationDelay(0, 200);
     ginny.AddAnimationImages(ANIMATION::Walk, 6, 4, Game.LoadImage("images/walk_000_small.png"), Game.LoadImage("images/walk_001_small.png"), Game.LoadImage("images/walk_002_small.png"), Game.LoadImage("images/walk_003_small.png"));
     ginny.AddAnimationImages(ANIMATION::Attack, 4, 5, Game.LoadImage("images/attack_000_small.png"), Game.LoadImage("images/attack_001_small.png"), Game.LoadImage("images/attack_002_small.png"), Game.LoadImage("images/attack_003_small.png"), Game.LoadImage("images/attack_004_small.png"));
     ginny.x = 0;

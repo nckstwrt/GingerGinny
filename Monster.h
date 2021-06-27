@@ -13,8 +13,7 @@ public:
     Monster();
     ~Monster();
 
-    void SetStillImage(SDL_Surface* imgStill);
-    void AddAnimationImages(ANIMATION animation, int imageCycleDelay, int imageCount, ...);
+    Animation* AddAnimationImages(ANIMATION animation, int imageCycleDelay, int imageCount, ...);
 
     void Move(DIRECTION direction);
     void Attack();
@@ -26,12 +25,7 @@ public:
 
 private:
     SDL_Surface* imgCurrentFrame;
-
-    SDL_Surface* imgStillRight;
-    SDL_Surface* imgStillLeft;
-
     map<ANIMATION, Animation*> animations;
-
     bool facingRight;
     bool walking;
     bool attacking;

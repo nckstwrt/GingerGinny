@@ -3,7 +3,6 @@
 Monster::Monster() :
     x(0), y(0),
     imgCurrentFrame(NULL),
-    imgStillLeft(NULL), imgStillRight(NULL),
     facingRight(true),
     walking(false),
     attacking(false),
@@ -13,9 +12,6 @@ Monster::Monster() :
 
 Monster::~Monster()
 {
-    if (imgStillLeft)
-        SDL_FreeSurface(imgStillLeft);
-
     if (deleteAnimations)
     {
         for (map<ANIMATION, Animation*>::iterator iter = animations.begin(); iter != animations.end(); iter++)
@@ -25,27 +21,23 @@ Monster::~Monster()
     }
 }
 
-void Monster::SetStillImage(SDL_Surface* imgStill)
-{
-    imgStillRight = imgStill;
-    imgStillLeft = rotozoomSurfaceXY(imgStillRight, 0, -1, 1, SMOOTHING_OFF);
-}
-
-void Monster::AddAnimationImages(ANIMATION animationType, int imageCycleDelay, int imageCount, ...)
+Animation* Monster::AddAnimationImages(ANIMATION animationType, int imageCycleDelay, int imageCount, ...)
 {
     va_list vl;
     va_start(vl, imageCount);
 
-    Animation *animation = new Animation(imageCycleDelay);
+    Animation *animation = new Animation();
 
     for (int i = 0; i < imageCount; i++)
     {
-        animation->AddImage(imageCount, i, va_arg(vl, SDL_Surface*));
+        animation->AddImage(imageCount, i, va_arg(vl, SDL_Surface*), imageCycleDelay);
     }
 
     animations[animationType] = animation;
 
     va_end(vl);
+
+    return animation;
 }
 
 void Monster::Move(DIRECTION direction)
@@ -82,7 +74,7 @@ void Monster::Update()
 {
     if (attacking)
     {
-        imgCurrentFrame = animations[ANIMATION::Attack]->CurrentFrame(facingRight);
+        imgCurrentFrame = animations[ANIMATION::Attack]->CurrentImage(facingRight);
         if (animations[ANIMATION::Attack]->Increment())
         {
             attacking = false;
@@ -92,12 +84,13 @@ void Monster::Update()
     {
         if (walking)
         {
-            imgCurrentFrame = animations[ANIMATION::Walk]->CurrentFrame(facingRight);
+            imgCurrentFrame = animations[ANIMATION::Walk]->CurrentImage(facingRight);
             animations[ANIMATION::Walk]->Increment();
         }
         else
         {
-            imgCurrentFrame = facingRight ? imgStillRight : imgStillLeft;
+            imgCurrentFrame = animations[ANIMATION::Idle]->CurrentImage(facingRight);
+            animations[ANIMATION::Idle]->Increment();
             animations[ANIMATION::Walk]->ResetAnimation();
         }
     }

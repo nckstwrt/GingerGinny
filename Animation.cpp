@@ -1,11 +1,12 @@
 #include "Animation.h"
 
-Animation::Animation(int imageCycleDelay) :
+Animation::Animation() :
     currentFrame(0),
+    currentImage(0),
     imageCount(0),
-    imageCycleDelay(imageCycleDelay),
     imagesRight(NULL),
-    imagesLeft(NULL)
+    imagesLeft(NULL),
+    animationDelays(NULL)
 {
 }
 
@@ -19,34 +20,22 @@ Animation::~Animation()
             SDL_FreeSurface(imagesLeft[i]);
         delete[] imagesLeft;
     }
+    if (animationDelays)
+        delete[] animationDelays;
 }
 
-void Animation::AddImages(int imageCount, ...)
-{
-    va_list vl;
-    va_start(vl, imageCount);
-
-    imagesRight = new SDL_Surface * [imageCount];
-    imagesLeft = new SDL_Surface * [imageCount];
-    for (int i = 0; i < imageCount; i++)
-    {
-        imagesRight[i] = va_arg(vl, SDL_Surface*);
-        imagesLeft[i] = rotozoomSurfaceXY(imagesRight[i], 0, -1, 1, SMOOTHING_OFF);
-    }
-    this->imageCount = imageCount;
-
-    va_end(vl);
-}
-
-void Animation::AddImage(int imageCount, int imageIndex, SDL_Surface* img)
+void Animation::AddImage(int imageCount, int imageIndex, SDL_Surface* img, int imageDelay)
 {
     if (!imagesRight)
         imagesRight = new SDL_Surface * [imageCount];
     if (!imagesLeft)
         imagesLeft = new SDL_Surface * [imageCount];
+    if (!animationDelays)
+        animationDelays = new int[imageCount];
 
     imagesRight[imageIndex] = img;
     imagesLeft[imageIndex] = rotozoomSurfaceXY(imagesRight[imageIndex], 0, -1, 1, SMOOTHING_OFF);
+    animationDelays[imageIndex] = imageDelay;
 
     this->imageCount = imageCount;
 }
@@ -55,9 +44,14 @@ bool Animation::Increment()
 {
     bool endOfCycle = false;
     currentFrame++;
-    if (currentFrame / imageCycleDelay == imageCount)
+    if (currentFrame == animationDelays[currentImage])
     {
+        currentImage++;
         currentFrame = 0;
+    }
+    if (currentImage == imageCount)
+    {
+        currentImage = 0;
         endOfCycle = true;
     }
     return endOfCycle;
@@ -68,7 +62,12 @@ void Animation::ResetAnimation()
     currentFrame = 0;
 }
 
-SDL_Surface* Animation::CurrentFrame(bool facingRight)
+SDL_Surface* Animation::CurrentImage(bool facingRight)
 {
-    return facingRight ? imagesRight[currentFrame / imageCycleDelay] : imagesLeft[currentFrame / imageCycleDelay];
+    return facingRight ? imagesRight[currentImage] : imagesLeft[currentImage];
+}
+
+void Animation::SetAnimationDelay(int imageIndex, int delay)
+{
+    animationDelays[imageIndex] = delay;
 }
