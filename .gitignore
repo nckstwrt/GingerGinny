@@ -29,7 +29,9 @@
 *.out
 *.app
 *.elf
+*.opk
 
 Debug/
 Release/
 .vs/
+x64/
