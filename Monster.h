@@ -25,6 +25,9 @@ public:
     int x;
     int y;
     bool facingRight;
+    bool AI;
+    int targetX;
+    int targetY;
 
 private:
     SDL_Surface* imgCurrentFrame;

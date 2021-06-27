@@ -3,6 +3,9 @@
 Monster::Monster() :
     x(0), y(0),
     facingRight(true),
+    AI(false),
+    targetX(-1),
+    targetY(-1),
     imgCurrentFrame(NULL),
     walking(false),
     attacking(false),
@@ -78,6 +81,44 @@ void Monster::Attack()
 
 void Monster::Update()
 {
+    if (AI)
+    {
+        if (targetX >= -1)
+        {
+            if (x == targetX && y == targetY || (targetX == -1 || targetY == -1))
+            {
+                if ((rand() % 3) == 0)
+                {
+                    targetX = -100;
+                    walking = false;
+                }
+                else
+                {
+                    targetX = rand() % (240 - 32);
+                    targetY = rand() % (240 - 32);
+                }
+            }
+
+            if (targetX >= 0)
+            {
+                double xDirection = targetX - x;
+                double yDirection = targetY - y;
+
+                double magnitude = sqrt(xDirection * xDirection + yDirection * yDirection);
+
+                double xUnit = xDirection / magnitude;
+                double yUnit = yDirection / magnitude;
+
+                x = (int)((((double)x) + xUnit) + 0.5);
+                y = (int)((((double)y) + yUnit) + 0.5);
+                facingRight = xDirection > 0;
+                walking = true;
+            }
+        }
+        else
+            targetX++;
+    }
+
     if (attacking)
     {
         imgCurrentFrame = animations[ANIMATION::Attack]->CurrentImage(facingRight);
