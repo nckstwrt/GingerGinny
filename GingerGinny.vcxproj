@@ -144,12 +144,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Animation.cpp" />
     <ClCompile Include="GingerGinny.cpp" />
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="SDLColor.cpp" />
     <ClCompile Include="SDLGame.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="SDLColor.h" />
     <ClInclude Include="SDLGame.h" />

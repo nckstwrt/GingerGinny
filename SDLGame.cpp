@@ -1,6 +1,6 @@
 #include "SDLGame.h"
 
-SDLGame::SDLGame() : fpsManager{ 0 }, hw_surface(NULL)
+SDLGame::SDLGame() : fpsManager{ 0 }, hw_surface(NULL), lastKeyPressed(0)
 {
     for (int i = 0; i < SDLK_LAST; i++)
         keys[i] = false;
@@ -43,6 +43,7 @@ SDL_Event SDLGame::PollEvents()
     {
         if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
         {
+            lastKeyPressed = event.key.keysym.sym;
             keys[event.key.keysym.sym] = (event.type == SDL_KEYDOWN);
         }
     }

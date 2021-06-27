@@ -31,6 +31,7 @@ public:
     SDL_Surface* CreateTextSurface(TTF_Font* font, const char* szText, SDL_Color col);
 
     bool keys[SDLK_LAST];
+    int lastKeyPressed;
 private:
     SDL_Surface* hw_surface;
     FPSmanager fpsManager;

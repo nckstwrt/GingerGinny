@@ -3,14 +3,9 @@
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_rotozoom.h>
-
-enum DIRECTION
-{
-    Left,
-    Right,
-    Up,
-    Down
-};
+#include "Animation.h"
+#include <map>
+using namespace std;
 
 class Monster
 {
@@ -19,9 +14,10 @@ public:
     ~Monster();
 
     void SetStillImage(SDL_Surface* imgStill);
-    void AddWalkImages(int walkImageCount, ...);
+    void AddAnimationImages(ANIMATION animation, int imageCycleDelay, int imageCount, ...);
 
     void Move(DIRECTION direction);
+    void Attack();
     void Update();
     SDL_Surface* GetCurrentFrame();
 
@@ -34,14 +30,12 @@ private:
     SDL_Surface* imgStillRight;
     SDL_Surface* imgStillLeft;
 
-    int walkImageCount;
-    SDL_Surface** imgWalkRight;
-    SDL_Surface** imgWalkLeft;
+    map<ANIMATION, Animation*> animations;
 
     bool facingRight;
     bool walking;
-    int walkingFrame;
-    int walkingFrameDelay;
+    bool attacking;
+    bool deleteAnimations;
 };
 
 

@@ -4,12 +4,10 @@ Monster::Monster() :
     x(0), y(0),
     imgCurrentFrame(NULL),
     imgStillLeft(NULL), imgStillRight(NULL),
-    walkImageCount(0),
-    imgWalkRight(NULL), imgWalkLeft(NULL),
     facingRight(true),
     walking(false),
-    walkingFrame(0),
-    walkingFrameDelay(6)
+    attacking(false),
+    deleteAnimations(true)
 {
 }
 
@@ -17,13 +15,13 @@ Monster::~Monster()
 {
     if (imgStillLeft)
         SDL_FreeSurface(imgStillLeft);
-    if (imgWalkRight)
-        delete[] imgWalkRight;
-    if (imgWalkLeft)
+
+    if (deleteAnimations)
     {
-        for (int i = 0; i < walkImageCount; i++)
-            SDL_FreeSurface(imgWalkLeft[i]);
-        delete[] imgWalkLeft;
+        for (map<ANIMATION, Animation*>::iterator iter = animations.begin(); iter != animations.end(); iter++)
+        {
+            delete iter->second;
+        }
     }
 }
 
@@ -33,61 +31,75 @@ void Monster::SetStillImage(SDL_Surface* imgStill)
     imgStillLeft = rotozoomSurfaceXY(imgStillRight, 0, -1, 1, SMOOTHING_OFF);
 }
 
-void Monster::AddWalkImages(int walkImageCount, ...)
+void Monster::AddAnimationImages(ANIMATION animationType, int imageCycleDelay, int imageCount, ...)
 {
     va_list vl;
-    va_start(vl, walkImageCount);
+    va_start(vl, imageCount);
 
-    imgWalkRight = new SDL_Surface * [walkImageCount];
-    imgWalkLeft = new SDL_Surface * [walkImageCount];
-    for (int i = 0; i < walkImageCount; i++)
+    Animation *animation = new Animation(imageCycleDelay);
+
+    for (int i = 0; i < imageCount; i++)
     {
-        imgWalkRight[i] = va_arg(vl, SDL_Surface*);
-        imgWalkLeft[i] = rotozoomSurfaceXY(imgWalkRight[i], 0, -1, 1, SMOOTHING_OFF);
+        animation->AddImage(imageCount, i, va_arg(vl, SDL_Surface*));
     }
-    this->walkImageCount = walkImageCount;
+
+    animations[animationType] = animation;
 
     va_end(vl);
 }
 
 void Monster::Move(DIRECTION direction)
 {
-    switch (direction)
+    if (!attacking)
     {
-    case Left:
-        facingRight = false;
-        x--;
-        break;
-    case Right:
-        facingRight = true;
-        x++;
-        break;
-    case Up:
-        y--;
-        break;
-    case Down:
-        y++;
-        break;
+        switch (direction)
+        {
+        case DIRECTION::Left:
+            facingRight = false;
+            x--;
+            break;
+        case DIRECTION::Right:
+            facingRight = true;
+            x++;
+            break;
+        case DIRECTION::Up:
+            y--;
+            break;
+        case DIRECTION::Down:
+            y++;
+            break;
+        }
+        walking = true;
     }
-    walking = true;
+}
+
+void Monster::Attack()
+{
+    attacking = true;
 }
 
 void Monster::Update()
 {
-    if (walking)
+    if (attacking)
     {
-        if (facingRight)
-            imgCurrentFrame = imgWalkRight[(walkingFrame / walkingFrameDelay)];
-        else
-            imgCurrentFrame = imgWalkLeft[(walkingFrame / walkingFrameDelay)];
-        walkingFrame++;
-        if ((walkingFrame / walkingFrameDelay) == walkImageCount)
-            walkingFrame = 0;
+        imgCurrentFrame = animations[ANIMATION::Attack]->CurrentFrame(facingRight);
+        if (animations[ANIMATION::Attack]->Increment())
+        {
+            attacking = false;
+        }
     }
     else
     {
-        imgCurrentFrame = facingRight ? imgStillRight : imgStillLeft;
-        walkingFrame = 0;
+        if (walking)
+        {
+            imgCurrentFrame = animations[ANIMATION::Walk]->CurrentFrame(facingRight);
+            animations[ANIMATION::Walk]->Increment();
+        }
+        else
+        {
+            imgCurrentFrame = facingRight ? imgStillRight : imgStillLeft;
+            animations[ANIMATION::Walk]->ResetAnimation();
+        }
     }
     walking = false;
 }

@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "SDLGame.h"
 #include "SDLColor.h"
 #include "Monster.h"
@@ -12,7 +13,8 @@ int main(int argc, char* argv[])
 
     Monster ginny;
     ginny.SetStillImage(Game.LoadImage("images/idle_000_small.png"));
-    ginny.AddWalkImages(4, Game.LoadImage("images/walk_000_small.png"), Game.LoadImage("images/walk_001_small.png"), Game.LoadImage("images/walk_002_small.png"), Game.LoadImage("images/walk_003_small.png"));
+    ginny.AddAnimationImages(ANIMATION::Walk, 6, 4, Game.LoadImage("images/walk_000_small.png"), Game.LoadImage("images/walk_001_small.png"), Game.LoadImage("images/walk_002_small.png"), Game.LoadImage("images/walk_003_small.png"));
+    ginny.AddAnimationImages(ANIMATION::Attack, 4, 5, Game.LoadImage("images/attack_000_small.png"), Game.LoadImage("images/attack_001_small.png"), Game.LoadImage("images/attack_002_small.png"), Game.LoadImage("images/attack_003_small.png"), Game.LoadImage("images/attack_004_small.png"));
     ginny.x = 0;
     ginny.y = 50;
 
@@ -22,11 +24,6 @@ int main(int argc, char* argv[])
 
     SDL_Surface* textSurface = Game.CreateTextSurface(ParryHotter, "Hello World!", SDLColor(0, 255, 0));
 
-    int x = 0;
-    int y = 50;
-    bool facingRight = true;
-    int walkingFrame = 0;
-    bool walking = false;
     while (true)
     {
         Game.ClearScreen();
@@ -51,22 +48,25 @@ int main(int argc, char* argv[])
         if (Game.PollEvents().type == SDL_QUIT || Game.keys[SDLK_q])
             break;
 
-        walking = false;
         if (Game.keys[SDLK_LEFT] || Game.keys[SDLK_l])
         {
-            ginny.Move(Left);
+            ginny.Move(DIRECTION::Left);
         }
         if (Game.keys[SDLK_RIGHT] || Game.keys[SDLK_r])
         {
-            ginny.Move(Right);
+            ginny.Move(DIRECTION::Right);
         }
         if (Game.keys[SDLK_UP] || Game.keys[SDLK_u])
         {
-            ginny.Move(Up);
+            ginny.Move(DIRECTION::Up);
         }
         if (Game.keys[SDLK_DOWN] || Game.keys[SDLK_d])
         {
-            ginny.Move(Down);
+            ginny.Move(DIRECTION::Down);
+        }
+        if (Game.keys[SDLK_a])
+        {
+            ginny.Attack();
         }
 
         ginny.Update();
