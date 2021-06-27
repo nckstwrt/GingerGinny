@@ -8,6 +8,11 @@ SDLGame::SDLGame() : fpsManager{ 0 }, hw_surface(NULL), lastKeyPressed(0)
 
 SDLGame::~SDLGame()
 {
+    for (map<string, SDL_Surface*>::iterator iter = imageMap.begin(); iter != imageMap.end(); iter++)
+    {
+        SDL_FreeSurface(iter->second);
+    }
+
     if (hw_surface != NULL)
     {
         SDL_FreeSurface(hw_surface);
@@ -62,7 +67,7 @@ SDL_Surface* SDLGame::LoadImage(const char* szImageFile)
     else
         printf("SDLGame::LoadImage - failed to load: %s\n", szImageFile);
 
-    imageMap[szImageFile] = img;
+    imageMap[szImageFile] = ret;
 
     return ret;
 }

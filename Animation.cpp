@@ -12,8 +12,8 @@ Animation::Animation() :
 
 Animation::~Animation()
 {
-    if (imagesRight)
-        delete[] imagesRight;
+ //   if (imagesRight)
+   //     delete[] imagesRight;
     if (imagesLeft)
     {
         for (int i = 0; i < imageCount; i++)
