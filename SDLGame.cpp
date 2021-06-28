@@ -67,8 +67,19 @@ SDL_Surface* SDLGame::LoadImage(const char* szImageFile)
     else
         printf("SDLGame::LoadImage - failed to load: %s\n", szImageFile);
 
-    imageMap[szImageFile] = ret;
+    if (strrchr(szImageFile, '/') != NULL)
+        imageMap[strrchr(szImageFile, '/') + 1] = ret;
+    else
+        imageMap[szImageFile] = ret;
 
+    return ret;
+}
+
+SDL_Surface* SDLGame::GetLoadedImage(const char* szImageShortName)
+{
+    SDL_Surface* ret = NULL;
+    if (imageMap.find(szImageShortName) != imageMap.end())
+        ret = imageMap[szImageShortName];
     return ret;
 }
 

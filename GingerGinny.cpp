@@ -6,9 +6,48 @@
 #include <vector>
 using namespace std;
 
+class Tile
+{
+public:
+    Tile(int x, int y) : x(x), y(y)
+    {
+    }
+    int x;
+    int y;
+    SDL_Surface* image;
+};
+
 class World
 {
 public:
+    World(SDLGame* pGame) : 
+        pGame(pGame),
+        offsetX(8),
+        offsetY(0)
+    {
+    }
+
+    void LoadMap(const char* szMapFile)
+    {
+        char szImage[100];
+        int x, y;
+        FILE* f = fopen(szMapFile, "rt");
+        while (true)
+        {
+            if (fscanf(f, "%d %d %s", &x, &y, szImage) != 3)
+                break;
+            Tile tile(x, y);
+            tile.image = pGame->GetLoadedImage(szImage);
+            if (tile.image == NULL)
+            {
+                string tileDirectory = "images/DungeonTilesetII_v1.4/";
+                tile.image = pGame->LoadImage((tileDirectory + szImage).c_str());
+            }
+            tiles.push_back(tile);
+        }
+        fclose(f);
+    }
+
     void AddMonster(Monster newMonster, int x, int y, bool facingRight)
     {
         newMonster.x = x;
@@ -26,15 +65,39 @@ public:
         }
     }
 
-    void Draw(SDLGame *game)
+    void Draw()
     {
+        // Draw Map
+        for (vector<Tile>::iterator iter = tiles.begin(); iter != tiles.end(); iter++)
+        {
+            int pixelX = TileXToPixelX(iter->x);
+            int pixelY = TileYToPixelY(iter->y);
+            if (pixelX >= 0 && pixelX < 240 && pixelY >= 0 && pixelY < 240)
+                pGame->BlitImage(iter->image, pixelX, pixelY);
+        }
+
+        // Draw monsters
         for (vector<Monster>::iterator iter = monsters.begin(); iter != monsters.end(); iter++)
         {
-            game->BlitImage(iter->GetCurrentFrame(), iter->x, iter->y);
+            pGame->BlitImage(iter->GetCurrentFrame(), iter->x, iter->y);
         }
     }
 
+    int TileXToPixelX(int tileX)
+    {
+        return (tileX - offsetX) * 16;
+    }
+
+    int TileYToPixelY(int tileY)
+    {
+        return (tileY - offsetY) * 16;
+    }
+
+    int offsetX;
+    int offsetY;
+    SDLGame* pGame;
     vector<Monster> monsters;
+    vector<Tile> tiles;
 };
 
 int main(int argc, char* argv[])
@@ -42,9 +105,10 @@ int main(int argc, char* argv[])
     srand(time(NULL));
 
     SDLGame Game;
-    World World;
+    World World(&Game);
 
     Game.SetupScreen(240, 240, false);
+    World.LoadMap("map1.txt");
 
     SDL_Surface* hw_surface = Game.GetSurface();
 
@@ -68,12 +132,14 @@ int main(int argc, char* argv[])
     zombie.AddAnimationImages(ANIMATION::Idle, 10, 4, Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_idle_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_idle_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_idle_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_idle_anim_f3.png"));
     zombie.AddAnimationImages(ANIMATION::Walk, 10, 4, Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f3.png"));
 
+    /*
     World.AddMonster(ogre, 50, 90, true);
     World.AddMonster(ogre, 180, 110, false);
     World.AddMonster(demon, 30, 150, true);
     World.AddMonster(demon, 110, 190, false);
     World.AddMonster(zombie, 140, 20, true);
     World.AddMonster(zombie, 200, 10, false);
+    */
 
     SDL_Surface* floor1 = Game.LoadImage("images/DungeonTilesetII_v1.4/floor_1.png");
 
@@ -91,19 +157,19 @@ int main(int argc, char* argv[])
         Uint32 color = SDL_MapRGB(hw_surface->format, 0, 255, 0);
         SDL_FillRect(hw_surface, &draw_rect, color);
         */
-
+        /*
         for (int y = 0; y < 15; y++)
         {
             for (int x = 0; x < 15; x++)
             {
                 Game.BlitImage(floor1, 0, 0, 16, 16, x*16, y*16);
             }
-        }
+        }*/
 
         Game.BlitImage(textSurface, 0, 0);
 
         World.Update();
-        World.Draw(&Game);
+        World.Draw();
 
         if (Game.PollEvents().type == SDL_QUIT || Game.keys[SDLK_q] || Game.keys[SDLK_ESCAPE])
             break;
