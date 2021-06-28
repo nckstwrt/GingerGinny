@@ -228,3 +228,5 @@
 9 10 floor_3.png
 11 13 floor_3.png
 12 9 floor_5.png
+5 9 floor_4.png
+10 11 floor_6.png

@@ -1,5 +1,6 @@
 #ifndef _SDLGAME_H
 #define _SDLGAME_H
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>

@@ -1,108 +1,12 @@
-#define _CRT_SECURE_NO_WARNINGS
 #include <time.h>
 #include "SDLGame.h"
 #include "SDLColor.h"
 #include "Monster.h"
-#include <vector>
-using namespace std;
-
-class Tile
-{
-public:
-    Tile(int x, int y) : x(x), y(y)
-    {
-    }
-    int x;
-    int y;
-    SDL_Surface* image;
-};
-
-class World
-{
-public:
-    World(SDLGame* pGame) : 
-        pGame(pGame),
-        offsetX(8),
-        offsetY(0)
-    {
-    }
-
-    void LoadMap(const char* szMapFile)
-    {
-        char szImage[100];
-        int x, y;
-        FILE* f = fopen(szMapFile, "rt");
-        while (true)
-        {
-            if (fscanf(f, "%d %d %s", &x, &y, szImage) != 3)
-                break;
-            Tile tile(x, y);
-            tile.image = pGame->GetLoadedImage(szImage);
-            if (tile.image == NULL)
-            {
-                string tileDirectory = "images/DungeonTilesetII_v1.4/";
-                tile.image = pGame->LoadImage((tileDirectory + szImage).c_str());
-            }
-            tiles.push_back(tile);
-        }
-        fclose(f);
-    }
-
-    void AddMonster(Monster newMonster, int x, int y, bool facingRight)
-    {
-        newMonster.x = x;
-        newMonster.y = y;
-        newMonster.facingRight = facingRight;
-        newMonster.AI = true;
-        monsters.push_back(newMonster);
-    }
-
-    void Update()
-    {
-        for (vector<Monster>::iterator iter = monsters.begin(); iter != monsters.end(); iter++)
-        {
-            iter->Update();
-        }
-    }
-
-    void Draw()
-    {
-        // Draw Map
-        for (vector<Tile>::iterator iter = tiles.begin(); iter != tiles.end(); iter++)
-        {
-            int pixelX = TileXToPixelX(iter->x);
-            int pixelY = TileYToPixelY(iter->y);
-            if (pixelX >= 0 && pixelX < 240 && pixelY >= 0 && pixelY < 240)
-                pGame->BlitImage(iter->image, pixelX, pixelY);
-        }
-
-        // Draw monsters
-        for (vector<Monster>::iterator iter = monsters.begin(); iter != monsters.end(); iter++)
-        {
-            pGame->BlitImage(iter->GetCurrentFrame(), iter->x, iter->y);
-        }
-    }
-
-    int TileXToPixelX(int tileX)
-    {
-        return (tileX - offsetX) * 16;
-    }
-
-    int TileYToPixelY(int tileY)
-    {
-        return (tileY - offsetY) * 16;
-    }
-
-    int offsetX;
-    int offsetY;
-    SDLGame* pGame;
-    vector<Monster> monsters;
-    vector<Tile> tiles;
-};
+#include "World.h"
 
 int main(int argc, char* argv[])
 {
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
 
     SDLGame Game;
     World World(&Game);
