@@ -7,22 +7,35 @@
 #include <vector>
 using namespace std;
 
+#define SCREEN_WIDTH 240
+#define SCREEN_HEIGHT 240
+
 class World
 {
 public:
     World(SDLGame* pGame);
+    ~World();
+
+    void FreeTileMap();
     void LoadMap(const char* szMapFile);
-    void AddMonster(Monster newMonster, int x, int y, bool facingRight);
+    Monster* AddMonster(Monster newMonster, int x, int y, bool facingRight);
     void Update();
     void Draw();
-    int TileXToPixelX(int tileX);
-    int TileYToPixelY(int tileY);
+    int TileXToDisplayPixelX(int tileX);
+    int TileYToDisplayPixelY(int tileY);
+    int PixelXToDisplayPixelX(int pixelX);
+    int PixelYToDisplayPixelY(int pixelY);
+    void MonsterMove(Monster* pMonster, DIRECTION direction);
+    void MonsterAttack(Monster* pMonster);
 
     int offsetX;
     int offsetY;
     SDLGame* pGame;
     vector<Monster> monsters;
     vector<Tile> tiles;
+    TILE_TYPE **tileMap;
+    int tileMapWidth;
+    int tileMapHeight;
 };
 
 #endif

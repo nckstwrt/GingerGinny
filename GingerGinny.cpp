@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
     SDLGame Game;
     World World(&Game);
 
-    Game.SetupScreen(240, 240, false);
+    Game.SetupScreen(SCREEN_WIDTH, SCREEN_HEIGHT, false);
     World.LoadMap("map1.txt");
 
     SDL_Surface* hw_surface = Game.GetSurface();
@@ -36,6 +36,8 @@ int main(int argc, char* argv[])
     zombie.AddAnimationImages(ANIMATION::Idle, 10, 4, Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_idle_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_idle_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_idle_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_idle_anim_f3.png"));
     zombie.AddAnimationImages(ANIMATION::Walk, 10, 4, Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f3.png"));
 
+    // Ginny is monster 0
+    Monster *pGinny = World.AddMonster(ginny, 50, 50, true);
     /*
     World.AddMonster(ogre, 50, 90, true);
     World.AddMonster(ogre, 180, 110, false);
@@ -43,13 +45,10 @@ int main(int argc, char* argv[])
     World.AddMonster(demon, 110, 190, false);
     World.AddMonster(zombie, 140, 20, true);
     World.AddMonster(zombie, 200, 10, false);
-    */
-
-    SDL_Surface* floor1 = Game.LoadImage("images/DungeonTilesetII_v1.4/floor_1.png");
 
     TTF_Font* ParryHotter = Game.LoadFont("fonts/ParryHotter.ttf", 48);
-
     SDL_Surface* textSurface = Game.CreateTextSurface(ParryHotter, "Hello World!", SDLColor(0, 255, 0));
+    */
 
     while (true)
     {
@@ -68,41 +67,39 @@ int main(int argc, char* argv[])
             {
                 Game.BlitImage(floor1, 0, 0, 16, 16, x*16, y*16);
             }
-        }*/
+        }
 
         Game.BlitImage(textSurface, 0, 0);
-
-        World.Update();
-        World.Draw();
+        */
 
         if (Game.PollEvents().type == SDL_QUIT || Game.keys[SDLK_q] || Game.keys[SDLK_ESCAPE])
             break;
 
         if (Game.keys[SDLK_LEFT] || Game.keys[SDLK_l])
         {
-            ginny.Move(DIRECTION::Left);
+            World.MonsterMove(pGinny, DIRECTION::Left);
         }
         if (Game.keys[SDLK_RIGHT] || Game.keys[SDLK_r])
         {
-            ginny.Move(DIRECTION::Right);
+            World.MonsterMove(pGinny, DIRECTION::Right);
         }
         if (Game.keys[SDLK_UP] || Game.keys[SDLK_u])
         {
-            ginny.Move(DIRECTION::Up);
+            World.MonsterMove(pGinny, DIRECTION::Up);
         }
         if (Game.keys[SDLK_DOWN] || Game.keys[SDLK_d])
         {
-            ginny.Move(DIRECTION::Down);
+            World.MonsterMove(pGinny, DIRECTION::Down);
         }
         if (Game.keys[SDLK_a])
         {
-            ginny.Attack();
+            World.MonsterAttack(pGinny);
         }
 
-        ginny.Update();
-        Game.BlitImage(ginny.GetCurrentFrame(), ginny.x, ginny.y);
+        World.Update();
+        World.Draw();
 
-        // Switch buffers to show the square we just drew
+        // Switch buffers and add frame rate control
         Game.FlipScreen();
         Game.FrameRateDelay();
     }
