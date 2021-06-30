@@ -9,6 +9,7 @@ using namespace std;
 
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 240
+#define TILE_SIZE 16
 
 class World
 {
@@ -32,8 +33,7 @@ public:
     int offsetY;
     SDLGame* pGame;
     vector<Monster> monsters;
-    vector<Tile> tiles;
-    TILE_TYPE **tileMap;
+    Tile ***tileMap;
     int tileMapWidth;
     int tileMapHeight;
 };

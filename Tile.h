@@ -12,7 +12,10 @@ enum class TILE_TYPE : char
 class Tile
 {
 public:
-    Tile(int x, int y) : x(x), y(y), image(NULL), tileType(TILE_TYPE::FLOOR)
+    Tile() : Tile(0, 0) 
+    {
+    }
+    Tile(int x, int y) : x(x), y(y), image(NULL), tileType(TILE_TYPE::EMPTY)
     {
     }
     int x;
