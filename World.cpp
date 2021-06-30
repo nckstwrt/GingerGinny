@@ -130,14 +130,6 @@ void World::Draw()
             }
         }
     }
-    /*
-    for (vector<Tile>::iterator iter = tiles.begin(); iter != tiles.end(); iter++)
-    {
-        int pixelX = TileXToDisplayPixelX(iter->x);
-        int pixelY = TileYToDisplayPixelY(iter->y);
-        if (pixelX >= 0 && pixelX < SCREEN_WIDTH && pixelY >= 0 && pixelY < SCREEN_HEIGHT)
-            pGame->BlitImage(iter->image, pixelX, pixelY);
-    }*/
 
     // Draw monsters (skipping the first one, which is Ginny)
     for (vector<Monster>::iterator iter = monsters.begin()+1; iter != monsters.end(); iter++)
