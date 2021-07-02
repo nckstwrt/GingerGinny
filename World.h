@@ -20,6 +20,7 @@ public:
 
     void FreeTileMap();
     void LoadMap(const char* szMapFile);
+    Tile* SafeGetTile(int x, int y, int i);
     Monster* AddMonster(Monster newMonster, int x, int y, bool facingRight);
     void Update();
     void Draw();

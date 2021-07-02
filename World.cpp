@@ -52,13 +52,6 @@ void World::LoadMap(const char* szMapFile)
         tile.image = pGame->GetLoadedImage(szImage);
         tile.tileType = (strstr(szImage, "wall") == NULL) ? TILE_TYPE::FLOOR : TILE_TYPE::WALL;
 
-        /*
-        if (tile.tileType == TILE_TYPE::WALL)
-        {
-            if (strstr(szImage, "wall_side"))
-                tile.tileType = TILE_TYPE::WALL_ALWAYS_ON_TOP;
-        }*/
-
         if (tile.image == NULL)
         {
             string tileDirectory = "images/DungeonTilesetII_v1.4/";
@@ -89,6 +82,40 @@ void World::LoadMap(const char* szMapFile)
                 tileMap[iter->y][iter->x][2] = *iter;
         }
     }
+
+    // Now force some walls to be on top
+    for (int y = 0; y < tileMapHeight; y++)
+    {
+        for (int x = 0; x < tileMapWidth; x++)
+        {
+            for (int i = 0; i < MAX_TILE_PER_SQUARE; i++)
+            {
+                if (SafeGetTile(x, y, i)->tileType == TILE_TYPE::WALL &&
+                    (SafeGetTile(x + 1, y + 2, 0)->tileType == TILE_TYPE::EMPTY || SafeGetTile(x - 1, y + 2, 0)->tileType == TILE_TYPE::EMPTY) &&
+                    SafeGetTile(x, y - 1, 0)->tileType == TILE_TYPE::FLOOR)
+                    {
+                        SafeGetTile(x, y, i)->tileType = TILE_TYPE::WALL_ALWAYS_ON_TOP;
+                        //SafeGetTile(x, y - 1, 0)->tileType = TILE_TYPE::DEBUG;
+                    }
+            }
+        }
+    }
+}
+
+Tile* World::SafeGetTile(int x, int y, int i)
+{
+    static Tile staticTile;
+    Tile* ret = &staticTile;
+
+    if (x >= 0 && x < tileMapWidth && y >= 0 && y < tileMapHeight && i < MAX_TILE_PER_SQUARE)
+    {
+        if (tileMap[y][x] != NULL)
+        {
+            ret = &tileMap[y][x][i];
+        }
+    }
+
+    return ret;
 }
 
 Monster* World::AddMonster(Monster newMonster, int tileX, int tileY, bool facingRight)
@@ -148,7 +175,13 @@ void World::Draw()
                         {
                             int pixelX = TileXToDisplayPixelX(pTile->x);
                             int pixelY = TileYToDisplayPixelY(pTile->y);
-                            if ((pTile->tileType == TILE_TYPE::FLOOR || (startTileY + y + 2 < tileMapHeight && tileMap[startTileY + y + 2][startTileX + x] != NULL)))
+
+                            if (pTile->tileType == TILE_TYPE::DEBUG)
+                            {
+                                pGame->DrawRect(pixelX, pixelY, 16, 16, 255, 0, 0);
+                            }
+                            else
+                            if ((pTile->tileType == TILE_TYPE::FLOOR || (startTileY + y + 2 < tileMapHeight && tileMap[startTileY + y + 2][startTileX + x] != NULL)) && pTile->tileType != TILE_TYPE::WALL_ALWAYS_ON_TOP)
                                 pGame->BlitImage(pTile->image, pixelX, pixelY);
                         }
                         else
@@ -184,7 +217,13 @@ void World::Draw()
                         {
                             int pixelX = TileXToDisplayPixelX(pTile->x);
                             int pixelY = TileYToDisplayPixelY(pTile->y);
-                            if (!(pTile->tileType == TILE_TYPE::FLOOR || (startTileY + y + 2 < tileMapHeight && tileMap[startTileY + y + 2][startTileX + x] != NULL)))
+
+                            if (pTile->tileType == TILE_TYPE::DEBUG)
+                            {
+                                pGame->DrawRect(pixelX, pixelY, 16, 16, 255, 0, 0);
+                            }
+                            else
+                            if (!(pTile->tileType == TILE_TYPE::FLOOR || (startTileY + y + 2 < tileMapHeight && tileMap[startTileY + y + 2][startTileX + x] != NULL)) || pTile->tileType == TILE_TYPE::WALL_ALWAYS_ON_TOP)
                                 pGame->BlitImage(pTile->image, pixelX, pixelY);
                         }
                         else

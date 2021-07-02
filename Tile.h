@@ -7,7 +7,8 @@ enum class TILE_TYPE : char
     EMPTY,
     FLOOR,
     WALL,
-    WALL_ALWAYS_ON_TOP
+    WALL_ALWAYS_ON_TOP,
+    DEBUG
 };
 
 class Tile
