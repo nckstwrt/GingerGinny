@@ -3,10 +3,11 @@
 World::World(SDLGame* pGame) :
     pGame(pGame),
     offsetX(0),
-    offsetY(16),
+    offsetY(0),
     tileMap(NULL),
     tileMapWidth(0),
-    tileMapHeight(0)
+    tileMapHeight(0),
+    pCameraFollow(NULL)
 {
 }
 
@@ -50,6 +51,14 @@ void World::LoadMap(const char* szMapFile)
         Tile tile(x, y);
         tile.image = pGame->GetLoadedImage(szImage);
         tile.tileType = (strstr(szImage, "wall") == NULL) ? TILE_TYPE::FLOOR : TILE_TYPE::WALL;
+
+        /*
+        if (tile.tileType == TILE_TYPE::WALL)
+        {
+            if (strstr(szImage, "wall_side"))
+                tile.tileType = TILE_TYPE::WALL_ALWAYS_ON_TOP;
+        }*/
+
         if (tile.image == NULL)
         {
             string tileDirectory = "images/DungeonTilesetII_v1.4/";
@@ -69,7 +78,7 @@ void World::LoadMap(const char* szMapFile)
     {
         if (tileMap[iter->y][iter->x] == NULL)
         {
-            tileMap[iter->y][iter->x] = new Tile[3]();
+            tileMap[iter->y][iter->x] = new Tile[MAX_TILE_PER_SQUARE]();
             tileMap[iter->y][iter->x][0] = *iter;
         }
         else
@@ -89,15 +98,34 @@ Monster* World::AddMonster(Monster newMonster, int tileX, int tileY, bool facing
     newMonster.facingRight = facingRight;
     //newMonster.AI = true;
     monsters.push_back(newMonster);
+    if (monsters.size() == 1)
+        pCameraFollow = &monsters[0];
     return &monsters.back();
 }
 
 void World::Update()
 {
+    // Update all Monsters
     for (vector<Monster>::iterator iter = monsters.begin(); iter != monsters.end(); iter++)
     {
         iter->Update();
     }
+
+    // Update the Viewpoint Offset based on who the camera is following (horizontal)
+    if (PixelXToDisplayPixelX(pCameraFollow->x) < (SCREEN_WIDTH / 6))
+        offsetX -= (SCREEN_WIDTH / 6) - PixelXToDisplayPixelX(pCameraFollow->x);
+    if (PixelXToDisplayPixelX(pCameraFollow->x + pCameraFollow->width) > ((SCREEN_WIDTH / 6) * 5))
+        offsetX += PixelXToDisplayPixelX(pCameraFollow->x + pCameraFollow->width) - ((SCREEN_WIDTH / 6) * 5);
+    if (offsetX < 0)
+        offsetX = 0;
+
+    // Now update for the vertical
+    if (PixelYToDisplayPixelY(pCameraFollow->y) < (SCREEN_HEIGHT / 6))
+        offsetY -= (SCREEN_HEIGHT / 6) - PixelYToDisplayPixelY(pCameraFollow->y);
+    if (PixelYToDisplayPixelY(pCameraFollow->y + pCameraFollow->height) > ((SCREEN_HEIGHT / 6) * 5))
+        offsetY += PixelYToDisplayPixelY(pCameraFollow->y + pCameraFollow->height) - ((SCREEN_HEIGHT / 6) * 5);
+    if (offsetY < 0)
+        offsetY = 0;
 }
 
 void World::Draw()
@@ -105,22 +133,22 @@ void World::Draw()
     // Draw Map
     int startTileX = offsetX / TILE_SIZE;
     int startTileY = offsetY / TILE_SIZE;
-    for (int y = 0; y < (SCREEN_HEIGHT / TILE_SIZE); y++)
+    for (int y = 0; y < (SCREEN_HEIGHT / TILE_SIZE)+1; y++)
     {
-        for (int x = 0; x < (SCREEN_WIDTH / TILE_SIZE); x++)
+        for (int x = 0; x < (SCREEN_WIDTH / TILE_SIZE)+1; x++)
         {
             if (startTileY + y < tileMapHeight && startTileX + x < tileMapWidth)
             {
                 if (tileMap[startTileY + y][startTileX + x] != NULL)
                 {
-                    for (int i = 0; i < 3; i++)
+                    for (int i = 0; i < MAX_TILE_PER_SQUARE; i++)
                     {
                         Tile* pTile = &tileMap[startTileY + y][startTileX + x][i];
                         if (pTile != NULL && pTile->image != NULL)
                         {
                             int pixelX = TileXToDisplayPixelX(pTile->x);
                             int pixelY = TileYToDisplayPixelY(pTile->y);
-                            //if (pixelX >= 0 && pixelX < SCREEN_WIDTH && pixelY >= 0 && pixelY < SCREEN_HEIGHT)
+                            if ((pTile->tileType == TILE_TYPE::FLOOR || (startTileY + y + 2 < tileMapHeight && tileMap[startTileY + y + 2][startTileX + x] != NULL)))
                                 pGame->BlitImage(pTile->image, pixelX, pixelY);
                         }
                         else
@@ -139,6 +167,33 @@ void World::Draw()
 
     // Draw Ginny last so she's always on top
     pGame->BlitImage(monsters[0].GetCurrentFrame(), PixelXToDisplayPixelX(monsters[0].x), PixelYToDisplayPixelY(monsters[0].y));
+
+    // Draw parts of the floor + walls that should be over Ginny
+    for (int y = 0; y < (SCREEN_HEIGHT / TILE_SIZE)+1; y++)
+    {
+        for (int x = 0; x < (SCREEN_WIDTH / TILE_SIZE)+1; x++)
+        {
+            if (startTileY + y < tileMapHeight && startTileX + x < tileMapWidth)
+            {
+                if (tileMap[startTileY + y][startTileX + x] != NULL)
+                {
+                    for (int i = 0; i < MAX_TILE_PER_SQUARE; i++)
+                    {
+                        Tile* pTile = &tileMap[startTileY + y][startTileX + x][i];
+                        if (pTile != NULL && pTile->image != NULL)
+                        {
+                            int pixelX = TileXToDisplayPixelX(pTile->x);
+                            int pixelY = TileYToDisplayPixelY(pTile->y);
+                            if (!(pTile->tileType == TILE_TYPE::FLOOR || (startTileY + y + 2 < tileMapHeight && tileMap[startTileY + y + 2][startTileX + x] != NULL)))
+                                pGame->BlitImage(pTile->image, pixelX, pixelY);
+                        }
+                        else
+                            break;
+                    }
+                }
+            }
+        }
+    }
 }
 
 int World::TileXToDisplayPixelX(int tileX)
@@ -166,15 +221,22 @@ void World::MonsterMove(Monster* pMonster, DIRECTION direction)
     int savedX = pMonster->x;
     int savedY = pMonster->y;
     pMonster->Move(direction);
+
+    int monsterX1 = pMonster->x - 4;
+    int monsterX2 = pMonster->x + pMonster->width + 6;
+    int monsterY = pMonster->y + pMonster->height - 8;
     
     bool moveBack = false;
-    int monsterXTile = pMonster->x / TILE_SIZE;
-    int monsterYTile = pMonster->y / TILE_SIZE;
-    if (monsterXTile >= 0 && monsterYTile >= 0 && 
-        monsterXTile < tileMapWidth && monsterYTile < tileMapHeight)
+    int monsterXTile1 = monsterX1 / TILE_SIZE;
+    int monsterXTile2 = monsterX2 / TILE_SIZE;
+    int monsterYTile = monsterY / TILE_SIZE;
+    if (monsterXTile1 >= 0 && monsterXTile2 >= 0 && monsterYTile >= 0 &&
+        monsterXTile1 < tileMapWidth && monsterXTile2 < tileMapWidth && monsterYTile < tileMapHeight)
     {
         // Check Tile (Y and X are supposed to be the wrong way round)
-        if (tileMap[monsterYTile][monsterXTile] != NULL && tileMap[monsterYTile][monsterXTile][0].tileType == TILE_TYPE::EMPTY)
+        if (tileMap[monsterYTile][monsterXTile1] == NULL || (tileMap[monsterYTile][monsterXTile1] != NULL && tileMap[monsterYTile][monsterXTile1][0].tileType != TILE_TYPE::FLOOR))
+            moveBack = true;
+        if (tileMap[monsterYTile][monsterXTile2] == NULL || (tileMap[monsterYTile][monsterXTile2] != NULL && tileMap[monsterYTile][monsterXTile2][0].tileType != TILE_TYPE::FLOOR))
             moveBack = true;
     }
     else

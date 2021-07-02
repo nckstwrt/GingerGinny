@@ -78,10 +78,12 @@ int main(int argc, char* argv[])
         if (Game.keys[SDLK_LEFT] || Game.keys[SDLK_l])
         {
             World.MonsterMove(pGinny, DIRECTION::Left);
+            //World.offsetX--;
         }
         if (Game.keys[SDLK_RIGHT] || Game.keys[SDLK_r])
         {
             World.MonsterMove(pGinny, DIRECTION::Right);
+            //World.offsetX++;
         }
         if (Game.keys[SDLK_UP] || Game.keys[SDLK_u])
         {

@@ -10,6 +10,7 @@ using namespace std;
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 240
 #define TILE_SIZE 16
+#define MAX_TILE_PER_SQUARE 3
 
 class World
 {
@@ -36,6 +37,7 @@ public:
     Tile ***tileMap;
     int tileMapWidth;
     int tileMapHeight;
+    Monster* pCameraFollow;
 };
 
 #endif

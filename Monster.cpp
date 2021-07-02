@@ -2,6 +2,7 @@
 
 Monster::Monster() :
     x(0), y(0),
+    width(0), height(0),
     facingRight(true),
     AI(false),
     targetX(-1),
@@ -31,6 +32,11 @@ Animation* Monster::AddAnimationImages(ANIMATION animationType, int imageCycleDe
     for (int i = 0; i < imageCount; i++)
     {
         animation.AddImage(imageCount, i, va_arg(vl, SDL_Surface*), imageCycleDelay);
+        if (width == 0 || height == 0)
+        {
+            width = animation.CurrentImage()->w;
+            height = animation.CurrentImage()->h;
+        }
     }
 
     animations[animationType] = animation;
@@ -49,11 +55,11 @@ void Monster::Move(DIRECTION direction)
         {
         case DIRECTION::Left:
             facingRight = false;
-            x--;
+            x-=1;
             break;
         case DIRECTION::Right:
             facingRight = true;
-            x++;
+            x+=1;
             break;
         case DIRECTION::Up:
             y--;
