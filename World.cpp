@@ -198,7 +198,7 @@ void World::Draw()
         pGame->BlitImage(iter->GetCurrentFrame(), PixelXToDisplayPixelX(iter->x), PixelYToDisplayPixelY(iter->y));
     }
 
-    // Draw Ginny last so she's always on top
+    // Draw Ginny last so she's always on top of the other monsters
     pGame->BlitImage(monsters[0].GetCurrentFrame(), PixelXToDisplayPixelX(monsters[0].x), PixelYToDisplayPixelY(monsters[0].y));
 
     // Draw parts of the floor + walls that should be over Ginny
