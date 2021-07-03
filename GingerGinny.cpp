@@ -3,6 +3,7 @@
 #include "SDLColor.h"
 #include "Monster.h"
 #include "World.h"
+#include <SDL/SDL_mixer.h>
 
 int main(int argc, char* argv[])
 {
@@ -10,6 +11,14 @@ int main(int argc, char* argv[])
 
     SDLGame Game;
     World World(&Game);
+
+    // Harry Potter Music :)
+    if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
+        return -1;
+    Mix_VolumeMusic(128);
+    Mix_Music* music = Mix_LoadMUS("hp.ogg");
+    if (music != NULL)
+        Mix_PlayMusic(music, -1);
 
     Game.SetupScreen(SCREEN_WIDTH, SCREEN_HEIGHT, false);
     World.LoadMap("map1.txt");
@@ -50,7 +59,40 @@ int main(int argc, char* argv[])
     SDL_Surface* textSurface = Game.CreateTextSurface(ParryHotter, "Hello World!", SDLColor(0, 255, 0));
     */
 
+    TTF_Font* ParryHotter = Game.LoadFont("fonts/ParryHotter.ttf", 36);
+
+    // Start Screen
+    bool runGame = true;
+    auto pTitleScreen = Game.LoadImage("TeenageMutantGingerGinny.png");
+    int counter = 0;
+    SDLColor color;
     while (true)
+    {
+        Game.ClearScreen(SDLColor(34,34,34));
+
+        Game.BlitImage(pTitleScreen, 0, 25);
+
+        if (((counter++) % 4) == 0)
+            color = SDLColor(rand() % 255, rand() % 255, rand() % 255);
+        SDL_Surface* pressStart = Game.CreateTextSurface(ParryHotter, "Press Start", color);
+        Game.BlitImage(pressStart, SCREEN_WIDTH / 2 - pressStart->w / 2, 140);
+
+        if (Game.PollEvents().type == SDL_QUIT || Game.keys[SDLK_q] || Game.keys[SDLK_ESCAPE])
+        {
+            runGame = false;
+            break;
+        }
+
+        if (Game.keys[SDLK_RETURN] || Game.keys[SDLK_s])
+            break;
+
+        Game.FlipScreen();
+        Game.FrameRateDelay();
+        SDL_FreeSurface(pressStart);
+    }
+
+    // Run Game
+    while (runGame)
     {
         Game.ClearScreen();
 

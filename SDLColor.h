@@ -14,6 +14,11 @@ public:
         return color;
     }
 
+    operator Uint32()
+    {
+        return *(Uint32*)&color;
+    }
+
     SDL_Color color;
 };
 

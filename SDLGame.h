@@ -7,6 +7,7 @@
 #include <SDL/SDL_framerate.h>
 #include <SDL/SDL_rotozoom.h>
 #include <SDL/SDL_ttf.h>
+#include "SDLColor.h"
 #include <map>
 #include <string>
 using namespace std;
@@ -19,6 +20,7 @@ public:
 
     bool SetupScreen(int width, int height, bool fullScreen);
     void ClearScreen();
+    void ClearScreen(SDLColor c);
     void FlipScreen();
     SDL_Event PollEvents();
     SDL_Surface* LoadImage(const char* szImageFile);

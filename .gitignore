@@ -31,6 +31,8 @@
 *.elf
 *.opk
 
+*.ogg
+
 Debug/
 Release/
 .vs/

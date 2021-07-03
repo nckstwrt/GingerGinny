@@ -22,7 +22,7 @@ SDLGame::~SDLGame()
 
 bool SDLGame::SetupScreen(int width, int height, bool fullScreen)
 {
-    SDL_Init(SDL_INIT_VIDEO);
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
     TTF_Init();
     hw_surface = SDL_SetVideoMode(width, height, 32, SDL_HWSURFACE | SDL_DOUBLEBUF | (fullScreen ? SDL_FULLSCREEN : 0));
     SDL_ShowCursor(0);
@@ -34,6 +34,11 @@ bool SDLGame::SetupScreen(int width, int height, bool fullScreen)
 void SDLGame::ClearScreen()
 {
     SDL_FillRect(hw_surface, NULL, 0x000000);
+}
+
+void SDLGame::ClearScreen(SDLColor c)
+{
+    SDL_FillRect(hw_surface, NULL, c);
 }
 
 void SDLGame::FlipScreen()
@@ -134,6 +139,6 @@ TTF_Font* SDLGame::LoadFont(const char* szFont, int fontSize)
 
 SDL_Surface* SDLGame::CreateTextSurface(TTF_Font* font, const char* szText, SDL_Color col)
 {
-    TTF_SetFontOutline(font, 1);
+    //TTF_SetFontOutline(font, 1);
     return TTF_RenderText_Blended(font, szText, col);
 }
