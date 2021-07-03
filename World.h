@@ -30,6 +30,7 @@ public:
     int PixelYToDisplayPixelY(int pixelY);
     void MonsterMove(Monster* pMonster, DIRECTION direction);
     void MonsterAttack(Monster* pMonster);
+    int DrawTextBox(TTF_Font* font, const char* szText);
 
     int offsetX;
     int offsetY;

@@ -178,7 +178,7 @@ void World::Draw()
 
                             if (pTile->tileType == TILE_TYPE::DEBUG)
                             {
-                                pGame->DrawRect(pixelX, pixelY, 16, 16, 255, 0, 0);
+                                pGame->DrawRect(pixelX, pixelY, 16, 16, SDLColor(255, 0, 0));
                             }
                             else
                             if ((pTile->tileType == TILE_TYPE::FLOOR || (startTileY + y + 2 < tileMapHeight && tileMap[startTileY + y + 2][startTileX + x] != NULL)) && pTile->tileType != TILE_TYPE::WALL_ALWAYS_ON_TOP)
@@ -220,7 +220,7 @@ void World::Draw()
 
                             if (pTile->tileType == TILE_TYPE::DEBUG)
                             {
-                                pGame->DrawRect(pixelX, pixelY, 16, 16, 255, 0, 0);
+                                pGame->DrawRect(pixelX, pixelY, 16, 16, SDLColor(255, 0, 0));
                             }
                             else
                             if (!(pTile->tileType == TILE_TYPE::FLOOR || (startTileY + y + 2 < tileMapHeight && tileMap[startTileY + y + 2][startTileX + x] != NULL)) || pTile->tileType == TILE_TYPE::WALL_ALWAYS_ON_TOP)
@@ -291,4 +291,44 @@ void World::MonsterMove(Monster* pMonster, DIRECTION direction)
 void World::MonsterAttack(Monster* pMonster)
 {
     pMonster->Attack();
+}
+
+int World::DrawTextBox(TTF_Font* font, const char* szText)
+{
+    int ret = 0;
+    int textBoxHeightStart = SCREEN_HEIGHT - 70;
+    int outerIndent = 1;
+    int innerIndent = 4;
+    SDLColor backGroundColor = SDLColor(200, 200, 200);
+    SDLColor triangeColor = SDLColor(30, 30, 30);
+    pGame->DrawRect(outerIndent, textBoxHeightStart, SCREEN_WIDTH - (2 * outerIndent), SCREEN_HEIGHT - (textBoxHeightStart + outerIndent), backGroundColor, RECTANGLE_TYPE::FILLED_ROUNDED, 5);
+    pGame->DrawRect(outerIndent + innerIndent, textBoxHeightStart + innerIndent, SCREEN_WIDTH - (2 * (outerIndent + innerIndent)), SCREEN_HEIGHT - (textBoxHeightStart + innerIndent + outerIndent + innerIndent), SDLColor(127, 127, 127), RECTANGLE_TYPE::BOX_ROUNDED, 5);
+    pGame->OutputText(font, szText, SDLColor(40, 40, 40), outerIndent + (innerIndent * 2), textBoxHeightStart + outerIndent + innerIndent, SCREEN_WIDTH - (outerIndent + (innerIndent * 2)));
+    filledTrigonColor(pGame->GetSurface(), SCREEN_WIDTH - 20, SCREEN_HEIGHT - 18, SCREEN_WIDTH - 10, SCREEN_HEIGHT - 18, SCREEN_WIDTH - 15, SCREEN_HEIGHT - 10, triangeColor.ReversedUInt());
+
+    Uint32 counter = 0;
+    while (true)
+    {
+        if (((counter++) % 50) < 8)
+            triangeColor = backGroundColor;
+        else
+            triangeColor = SDLColor(30, 30, 30);
+        filledTrigonColor(pGame->GetSurface(), SCREEN_WIDTH - 20, SCREEN_HEIGHT - 18, SCREEN_WIDTH - 10, SCREEN_HEIGHT - 18, SCREEN_WIDTH - 15, SCREEN_HEIGHT - 10, triangeColor.ReversedUInt());
+        
+        if (pGame->PollEvents().type == SDL_QUIT || pGame->keys[SDLK_q] || pGame->keys[SDLK_ESCAPE])
+        {
+            ret = -1;
+            break;
+        }
+
+        if (pGame->keys[SDLK_a] || pGame->keys[SDLK_b] || pGame->keys[SDLK_x] || pGame->keys[SDLK_y] || pGame->keys[SDLK_s])
+            break;
+
+        pGame->FlipScreen();
+        pGame->FrameRateDelay();
+    }
+
+    // Reset the keys so they don't carry over to the game
+    pGame->ResetKeys();
+    return ret;
 }

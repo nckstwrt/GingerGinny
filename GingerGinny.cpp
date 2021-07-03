@@ -5,12 +5,14 @@
 #include "World.h"
 #include <SDL/SDL_mixer.h>
 
+
 int main(int argc, char* argv[])
 {
     srand((unsigned int)time(NULL));
 
     SDLGame Game;
     World World(&Game);
+    SDLFont fonts;
 
     // Harry Potter Music :)
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
@@ -56,6 +58,10 @@ int main(int argc, char* argv[])
     World.AddMonster(zombie, 200, 10, false);
     */
 
+    auto magicFont = fonts.LoadFont("fonts/MagicSchoolOne.ttf", 16);
+    auto yoster = fonts.LoadFont("fonts/MagicSchoolOne.ttf", 16);
+    auto chary = fonts.LoadFont("fonts/chary.ttf", 18);
+
     // Start Screen
     bool runGame = true;
     auto pTitleScreen = Game.LoadImage("TeenageMutantGingerGinny.png");
@@ -87,6 +93,8 @@ int main(int argc, char* argv[])
         SDL_FreeSurface(pressStart);
     }
 
+    Game.ResetKeys();
+
     // Stop TMNT theme start hp theme
     Mix_FadeOutMusic(100);
     Mix_VolumeMusic(128);
@@ -95,6 +103,7 @@ int main(int argc, char* argv[])
         Mix_PlayMusic(musicHP, -1);
 
     // Run Game
+    bool showText = true;
     while (runGame)
     {
         Game.ClearScreen();
@@ -125,6 +134,13 @@ int main(int argc, char* argv[])
 
         World.Update();
         World.Draw();
+
+        if (showText)
+        {
+            if (World.DrawTextBox(chary, "Teenage Mutant Ginger Ginny is here. And she is.... Evil!") == -1)
+                break;
+            showText = false;
+        }
 
         // Switch buffers and add frame rate control
         Game.FlipScreen();

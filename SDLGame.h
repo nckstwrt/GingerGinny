@@ -6,11 +6,20 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_framerate.h>
 #include <SDL/SDL_rotozoom.h>
-#include <SDL/SDL_ttf.h>
+#include <SDL/SDL_gfxPrimitives.h>
 #include "SDLColor.h"
+#include "SDLFont.h"
 #include <map>
 #include <string>
 using namespace std;
+
+enum class RECTANGLE_TYPE
+{
+    BOX,
+    FILLED,
+    BOX_ROUNDED,
+    FILLED_ROUNDED
+};
 
 class SDLGame
 {
@@ -28,16 +37,19 @@ public:
     void FreeImage(const char* szImageFile);
     void BlitImage(SDL_Surface* img, int x, int y);
     void BlitImage(SDL_Surface* img, int srcX, int srcY, int w, int h, int x, int y);
-    void DrawRect(int x, int y, int width, int height, Uint8 r, Uint8 g, Uint8 b);
+    void DrawRect(int x, int y, int width, int height, SDLColor color, RECTANGLE_TYPE rectangleType = RECTANGLE_TYPE::FILLED, int rad = 5);
     void FrameRateDelay();
     SDL_Surface* GetSurface();
     TTF_Font* LoadFont(const char* szFont, int fontSize);
+    void OutputText(TTF_Font* font, const char* szText, SDLColor col, int x, int y, int maxWidth);
     SDL_Surface* CreateTextSurface(TTF_Font* font, const char* szText, SDL_Color col);
+    void ResetKeys();
 
     bool keys[SDLK_LAST];
     int lastKeyPressed;
 private:
     SDL_Surface* hw_surface;
+    SDLFont fonts;
     FPSmanager fpsManager;
     map<string, SDL_Surface*> imageMap;
 };
