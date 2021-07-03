@@ -15,10 +15,10 @@ int main(int argc, char* argv[])
     // Harry Potter Music :)
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
         return -1;
-    Mix_VolumeMusic(128);
-    Mix_Music* music = Mix_LoadMUS("hp.ogg");
-    if (music != NULL)
-        Mix_PlayMusic(music, -1);
+    Mix_VolumeMusic(25);
+    Mix_Music* musicTMNT = Mix_LoadMUS("tmnt.ogg");
+    if (musicTMNT != NULL)
+        Mix_PlayMusic(musicTMNT, 0);
 
     Game.SetupScreen(SCREEN_WIDTH, SCREEN_HEIGHT, false);
     World.LoadMap("map1.txt");
@@ -87,6 +87,13 @@ int main(int argc, char* argv[])
         SDL_FreeSurface(pressStart);
     }
 
+    // Stop TMNT theme start hp theme
+    Mix_FadeOutMusic(100);
+    Mix_VolumeMusic(128);
+    Mix_Music* musicHP = Mix_LoadMUS("hp.ogg");
+    if (musicHP != NULL)
+        Mix_PlayMusic(musicHP, -1);
+
     // Run Game
     while (runGame)
     {
@@ -124,5 +131,7 @@ int main(int argc, char* argv[])
         Game.FrameRateDelay();
     }
 
+    Mix_FreeMusic(musicTMNT);
+    Mix_FreeMusic(musicHP);
     return 0;
 }
