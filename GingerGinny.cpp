@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
     // Harry Potter Music :)
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
         return -1;
-    Mix_VolumeMusic(25);
+    Mix_VolumeMusic(15);
     Mix_Music* musicTMNT = Mix_LoadMUS("tmnt.ogg");
     if (musicTMNT != NULL)
         Mix_PlayMusic(musicTMNT, 0);

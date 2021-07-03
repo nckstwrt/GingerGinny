@@ -139,18 +139,18 @@ void World::Update()
     }
 
     // Update the Viewpoint Offset based on who the camera is following (horizontal)
-    if (PixelXToDisplayPixelX(pCameraFollow->x) < (SCREEN_WIDTH / 6))
-        offsetX -= (SCREEN_WIDTH / 6) - PixelXToDisplayPixelX(pCameraFollow->x);
-    if (PixelXToDisplayPixelX(pCameraFollow->x + pCameraFollow->width) > ((SCREEN_WIDTH / 6) * 5))
-        offsetX += PixelXToDisplayPixelX(pCameraFollow->x + pCameraFollow->width) - ((SCREEN_WIDTH / 6) * 5);
+    if (PixelXToDisplayPixelX(pCameraFollow->x) < (SCREEN_WIDTH / 4))
+        offsetX -= (SCREEN_WIDTH / 4) - PixelXToDisplayPixelX(pCameraFollow->x);
+    if (PixelXToDisplayPixelX(pCameraFollow->x + pCameraFollow->width) > ((SCREEN_WIDTH / 4) * 3))
+        offsetX += PixelXToDisplayPixelX(pCameraFollow->x + pCameraFollow->width) - ((SCREEN_WIDTH / 4) * 3);
     if (offsetX < 0)
         offsetX = 0;
 
     // Now update for the vertical
-    if (PixelYToDisplayPixelY(pCameraFollow->y) < (SCREEN_HEIGHT / 6))
-        offsetY -= (SCREEN_HEIGHT / 6) - PixelYToDisplayPixelY(pCameraFollow->y);
-    if (PixelYToDisplayPixelY(pCameraFollow->y + pCameraFollow->height) > ((SCREEN_HEIGHT / 6) * 5))
-        offsetY += PixelYToDisplayPixelY(pCameraFollow->y + pCameraFollow->height) - ((SCREEN_HEIGHT / 6) * 5);
+    if (PixelYToDisplayPixelY(pCameraFollow->y) < (SCREEN_HEIGHT / 4))
+        offsetY -= (SCREEN_HEIGHT / 4) - PixelYToDisplayPixelY(pCameraFollow->y);
+    if (PixelYToDisplayPixelY(pCameraFollow->y + pCameraFollow->height) > ((SCREEN_HEIGHT / 4) * 3))
+        offsetY += PixelYToDisplayPixelY(pCameraFollow->y + pCameraFollow->height) - ((SCREEN_HEIGHT / 4) * 3);
     if (offsetY < 0)
         offsetY = 0;
 }
