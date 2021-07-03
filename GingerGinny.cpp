@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
     World World(&Game);
 
     // Harry Potter Music :)
-    if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
         return -1;
     Mix_VolumeMusic(128);
     Mix_Music* music = Mix_LoadMUS("hp.ogg");
@@ -54,16 +54,12 @@ int main(int argc, char* argv[])
     World.AddMonster(demon, 110, 190, false);
     World.AddMonster(zombie, 140, 20, true);
     World.AddMonster(zombie, 200, 10, false);
-
-    TTF_Font* ParryHotter = Game.LoadFont("fonts/ParryHotter.ttf", 48);
-    SDL_Surface* textSurface = Game.CreateTextSurface(ParryHotter, "Hello World!", SDLColor(0, 255, 0));
     */
-
-    TTF_Font* ParryHotter = Game.LoadFont("fonts/ParryHotter.ttf", 36);
 
     // Start Screen
     bool runGame = true;
     auto pTitleScreen = Game.LoadImage("TeenageMutantGingerGinny.png");
+    TTF_Font* ParryHotter = Game.LoadFont("fonts/ParryHotter.ttf", 36);
     int counter = 0;
     SDLColor color;
     while (true)
@@ -96,36 +92,16 @@ int main(int argc, char* argv[])
     {
         Game.ClearScreen();
 
-        /*
-        // Draw a green square in the middle of the screen
-        SDL_Rect draw_rect = { .x = (Sint16)x, .y = 70, .w = 100, .h = 100 };
-        Uint32 color = SDL_MapRGB(hw_surface->format, 0, 255, 0);
-        SDL_FillRect(hw_surface, &draw_rect, color);
-        */
-        /*
-        for (int y = 0; y < 15; y++)
-        {
-            for (int x = 0; x < 15; x++)
-            {
-                Game.BlitImage(floor1, 0, 0, 16, 16, x*16, y*16);
-            }
-        }
-
-        Game.BlitImage(textSurface, 0, 0);
-        */
-
         if (Game.PollEvents().type == SDL_QUIT || Game.keys[SDLK_q] || Game.keys[SDLK_ESCAPE])
             break;
 
         if (Game.keys[SDLK_LEFT] || Game.keys[SDLK_l])
         {
             World.MonsterMove(pGinny, DIRECTION::Left);
-            //World.offsetX--;
         }
         if (Game.keys[SDLK_RIGHT] || Game.keys[SDLK_r])
         {
             World.MonsterMove(pGinny, DIRECTION::Right);
-            //World.offsetX++;
         }
         if (Game.keys[SDLK_UP] || Game.keys[SDLK_u])
         {
