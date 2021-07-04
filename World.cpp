@@ -1,4 +1,5 @@
 #include "World.h"
+#include <algorithm>
 
 World::World(SDLGame* pGame) :
     pGame(pGame),
@@ -118,25 +119,29 @@ Tile* World::SafeGetTile(int x, int y, int i)
     return ret;
 }
 
-Monster* World::AddMonster(Monster newMonster, int tileX, int tileY, bool facingRight)
+shared_ptr<Monster> World::AddMonster(const Monster &monsterToCopy, int tileX, int tileY, bool facingRight)
 {
-    newMonster.x = tileX;
-    newMonster.y = tileY;
-    newMonster.facingRight = facingRight;
+    shared_ptr<Monster> newMonster = make_shared<Monster>(monsterToCopy);
+    newMonster->x = tileX;
+    newMonster->y = tileY;
+    newMonster->facingRight = facingRight;
     //newMonster.AI = true;
     monsters.push_back(newMonster);
     if (monsters.size() == 1)
-        pCameraFollow = &monsters[0];
-    return &monsters.back();
+        pCameraFollow = monsters[0];
+    return monsters.back();
 }
 
 void World::Update()
 {
     // Update all Monsters
-    for (vector<Monster>::iterator iter = monsters.begin(); iter != monsters.end(); iter++)
+    for (auto monster : monsters)
     {
-        iter->Update();
+        monster->Update();
     }
+
+    // Sort the monsters by Y order
+    sort(monsters.begin(), monsters.end(), [](const shared_ptr<Monster> a, const shared_ptr<Monster> b) -> bool { return a->y+a->height < b->y+b->height; });
 
     // Update the Viewpoint Offset based on who the camera is following (horizontal)
     if (PixelXToDisplayPixelX(pCameraFollow->x) < (SCREEN_WIDTH / 4))
@@ -192,14 +197,11 @@ void World::Draw()
         }
     }
 
-    // Draw monsters (skipping the first one, which is Ginny)
-    for (vector<Monster>::iterator iter = monsters.begin()+1; iter != monsters.end(); iter++)
+    // Draw monsters
+    for (auto monster : monsters)
     {
-        pGame->BlitImage(iter->GetCurrentFrame(), PixelXToDisplayPixelX(iter->x), PixelYToDisplayPixelY(iter->y));
+        pGame->BlitImage(monster->GetCurrentFrame(), PixelXToDisplayPixelX(monster->x), PixelYToDisplayPixelY(monster->y));
     }
-
-    // Draw Ginny last so she's always on top of the other monsters
-    pGame->BlitImage(monsters[0].GetCurrentFrame(), PixelXToDisplayPixelX(monsters[0].x), PixelYToDisplayPixelY(monsters[0].y));
 
     // Draw parts of the floor + walls that should be over Ginny
     for (int y = 0; y < (SCREEN_HEIGHT / TILE_SIZE)+1; y++)
@@ -255,7 +257,7 @@ int World::PixelYToDisplayPixelY(int pixelY)
     return (pixelY - offsetY);
 }
 
-void World::MonsterMove(Monster* pMonster, DIRECTION direction)
+void World::MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction)
 {
     int savedX = pMonster->x;
     int savedY = pMonster->y;
@@ -281,6 +283,22 @@ void World::MonsterMove(Monster* pMonster, DIRECTION direction)
     else
         moveBack = true;
 
+    // Check for monsters
+    if (!moveBack)
+    {
+        for (auto monster : monsters)
+        {
+            if (pMonster != monster)
+            {
+                if (pMonster->CheckOverlap(monster))
+                {
+                    moveBack = true;
+                    break;
+                }
+            }
+        }
+    }
+
     if (moveBack)
     {
         pMonster->x = savedX;
@@ -288,7 +306,7 @@ void World::MonsterMove(Monster* pMonster, DIRECTION direction)
     }
 }
 
-void World::MonsterAttack(Monster* pMonster)
+void World::MonsterAttack(shared_ptr<Monster> pMonster)
 {
     pMonster->Attack();
 }

@@ -157,7 +157,7 @@ void SDLGame::OutputText(TTF_Font* font, const char* szText, SDLColor col, int x
 {
     int lineHeight = 0;
     auto lines = fonts.OutputText(font, szText, col, maxWidth, &lineHeight);
-    for (auto line : lines)
+    for (auto &line : lines)
     {
         BlitImage(line, x, y);
         y += lineHeight;

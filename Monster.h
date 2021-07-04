@@ -5,6 +5,7 @@
 #include <SDL/SDL_rotozoom.h>
 #include "Animation.h"
 #include <map>
+#include <memory>
 using namespace std;
 
 class Monster
@@ -19,6 +20,7 @@ public:
     void Attack();
     void Update();
     SDL_Surface* GetCurrentFrame();
+    bool CheckOverlap(shared_ptr<Monster> p2);
 
     int x;
     int y;

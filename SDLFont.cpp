@@ -55,7 +55,7 @@ vector<SDL_Surface*> SDLFont::OutputText(TTF_Font* font, string text, SDLColor c
 
 void SDLFont::FreeSurfaces(vector<SDL_Surface*> surfaces)
 {
-    for (auto surface : surfaces)
+    for (auto &surface : surfaces)
     {
         SDL_FreeSurface(surface);
     }

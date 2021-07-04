@@ -5,6 +5,7 @@
 #include "World.h"
 #include <SDL/SDL_mixer.h>
 
+//#define PLAY_MUSIC
 
 int main(int argc, char* argv[])
 {
@@ -18,7 +19,10 @@ int main(int argc, char* argv[])
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
         return -1;
     Mix_VolumeMusic(15);
-    Mix_Music* musicTMNT = Mix_LoadMUS("tmnt.ogg");
+    Mix_Music* musicTMNT = NULL;
+#ifdef PLAY_MUSIC
+    musicTMNT = Mix_LoadMUS("tmnt.ogg");
+#endif
     if (musicTMNT != NULL)
         Mix_PlayMusic(musicTMNT, 0);
 
@@ -48,9 +52,10 @@ int main(int argc, char* argv[])
     zombie.AddAnimationImages(ANIMATION::Walk, 10, 4, Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f3.png"));
 
     // Ginny is monster 0
-    Monster *pGinny = World.AddMonster(ginny, 50, 50, true);
+    shared_ptr<Monster> pGinny = World.AddMonster(ginny, 50, 50, true);
+    
+    World.AddMonster(ogre, 50, 120, false);
     /*
-    World.AddMonster(ogre, 50, 90, true);
     World.AddMonster(ogre, 180, 110, false);
     World.AddMonster(demon, 30, 150, true);
     World.AddMonster(demon, 110, 190, false);
@@ -96,9 +101,13 @@ int main(int argc, char* argv[])
     Game.ResetKeys();
 
     // Stop TMNT theme start hp theme
-    Mix_FadeOutMusic(100);
+    Mix_FadeOutMusic(200);
+    SDL_Delay(200);
     Mix_VolumeMusic(128);
-    Mix_Music* musicHP = Mix_LoadMUS("hp.ogg");
+    Mix_Music* musicHP = NULL;
+#ifdef PLAY_MUSIC
+    musicHP = Mix_LoadMUS("hp.ogg");
+#endif
     if (musicHP != NULL)
         Mix_PlayMusic(musicHP, -1);
 

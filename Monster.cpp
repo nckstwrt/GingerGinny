@@ -150,3 +150,24 @@ SDL_Surface* Monster::GetCurrentFrame()
     return imgCurrentFrame;
 }
 
+bool Monster::CheckOverlap(shared_ptr<Monster> p2)
+{
+    SDL_Rect m1 = { .x = (Sint16)x, .y = (Sint16)y, .w = (Uint16)width, .h = (Uint16)height };
+    SDL_Rect m2 = { .x = (Sint16)p2->x, .y = (Sint16)p2->y, .w = (Uint16)p2->width, .h = (Uint16)p2->height };
+
+    // Make it so only their feet (10 pixels worth) actually cause overlap
+    m1.y = (m1.y + m1.h) - 10;
+    m1.h = 10;
+    m2.y = (m2.y + m2.h) - 10;
+    m2.h = 10;
+  
+    // Shrink the x boundaries to give a little overlap
+    m1.x += 3;
+    m1.w -= 6;
+    m2.x += 3;
+    m2.w -= 6;
+
+
+    return (m1.x < (m2.x + m2.w) && (m1.x + m1.w) > m2.x && m1.y < (m2.y + m2.h) && (m1.y + m1.h) > m2.y);
+}
+
