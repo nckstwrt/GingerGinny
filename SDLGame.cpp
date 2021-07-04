@@ -115,6 +115,20 @@ void SDLGame::BlitImage(SDL_Surface* img, int srcX, int srcY, int w, int h, int 
     SDL_BlitSurface(img, &sourceRect, hw_surface, &targetRect);
 }
 
+SDL_Surface* SDLGame::GetImageFromSheet(SDL_Surface* img, int srcX, int srcY, int w, int h)
+{
+    SDL_Rect sourceRect = { .x = (Sint16)srcX, .y = (Sint16)srcY, .w = (Uint16)w, .h = (Uint16)h };
+    SDL_Rect targetRect = { .x = (Sint16)0, .y = (Sint16)0, .w = (Uint16)w, .h = (Uint16)h };
+    SDL_Surface *newSurface = SDL_CreateRGBSurface(0, w, h, img->format->BytesPerPixel, img->format->Rmask, img->format->Gmask, img->format->Bmask, img->format->Amask);
+    SDL_Surface* newSurfaceConverted = SDL_DisplayFormatAlpha(newSurface);
+    SDL_FreeSurface(newSurface);
+
+    SDL_SetAlpha(img, 0, 0);
+    SDL_BlitSurface(img, &sourceRect, newSurfaceConverted, &targetRect);
+
+    return newSurfaceConverted;
+}
+
 void SDLGame::DrawRect(int x, int y, int width, int height, SDLColor color, RECTANGLE_TYPE rectangleType, int rad)
 {
     Uint32 c;

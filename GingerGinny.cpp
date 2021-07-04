@@ -31,6 +31,8 @@ int main(int argc, char* argv[])
 
     SDL_Surface* hw_surface = Game.GetSurface();
 
+    auto harryPotterSprites = Game.LoadImage("images/pixel_harry_potter_sprites_by_mudkat101-da3f0nk_small2.png");
+
     Monster ginny;
     Animation *idleAnim = ginny.AddAnimationImages(ANIMATION::Idle, 12, 2, Game.LoadImage("images/idle_000_vsmall.png"), Game.LoadImage("images/idle_001_vsmall.png"));
     idleAnim->SetAnimationDelay(0, 200);
@@ -51,10 +53,16 @@ int main(int argc, char* argv[])
     zombie.AddAnimationImages(ANIMATION::Idle, 10, 4, Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_idle_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_idle_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_idle_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_idle_anim_f3.png"));
     zombie.AddAnimationImages(ANIMATION::Walk, 10, 4, Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f3.png"));
 
+    Monster hagrid;
+    SDL_Surface* hagridImg = Game.GetImageFromSheet(harryPotterSprites, 150, 234, 190 - 150, 280 - 234);
+    hagrid.AddAnimationImages(ANIMATION::Idle, 1, 1, hagridImg);
+    
     // Ginny is monster 0
     shared_ptr<Monster> pGinny = World.AddMonster(ginny, 50, 50, true);
     
-    World.AddMonster(ogre, 50, 120, false);
+    shared_ptr<Monster> pOgre = World.AddMonster(ogre, 50, 120, false);
+
+    shared_ptr<Monster> pHagrid = World.AddMonster(hagrid, 105, 30, true);
     /*
     World.AddMonster(ogre, 180, 110, false);
     World.AddMonster(demon, 30, 150, true);
@@ -69,7 +77,7 @@ int main(int argc, char* argv[])
 
     // Start Screen
     bool runGame = true;
-    auto pTitleScreen = Game.LoadImage("TeenageMutantGingerGinny.png");
+    auto pTitleScreen = Game.LoadImage("images/TeenageMutantGingerGinny.png");
     TTF_Font* ParryHotter = Game.LoadFont("fonts/ParryHotter.ttf", 36);
     int counter = 0;
     SDLColor color;
@@ -140,9 +148,17 @@ int main(int argc, char* argv[])
         {
             World.MonsterAttack(pGinny);
         }
+        if (Game.keys[SDLK_b])
+        {
+            pOgre->MoveTo(pGinny->x+(pGinny->width/2), (pGinny->y+pGinny->height)-10);
+        }
+        
 
         World.Update();
         World.Draw();
+
+        //Game.BlitImage(harryPotterSprites, 3, 6, 32-3, 45-6, 30, 30);
+
 
         if (showText)
         {

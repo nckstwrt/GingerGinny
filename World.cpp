@@ -1,5 +1,4 @@
 #include "World.h"
-#include <algorithm>
 
 World::World(SDLGame* pGame) :
     pGame(pGame),
@@ -137,6 +136,17 @@ void World::Update()
     // Update all Monsters
     for (auto monster : monsters)
     {
+        // If has directions to go to, move the monster
+        if (monster->directions.size() > 0)
+        {
+            if (MonsterMove(monster, monster->directions.front()))
+            {
+                if (monster->directions.size() == 1)
+                    monster->walking = false;
+                monster->directions.pop();
+            }
+        }
+
         monster->Update();
     }
 
@@ -203,7 +213,7 @@ void World::Draw()
         pGame->BlitImage(monster->GetCurrentFrame(), PixelXToDisplayPixelX(monster->x), PixelYToDisplayPixelY(monster->y));
     }
 
-    // Draw parts of the floor + walls that should be over Ginny
+    // Draw parts of the floor + walls that should be over Ginny and the monsters
     for (int y = 0; y < (SCREEN_HEIGHT / TILE_SIZE)+1; y++)
     {
         for (int x = 0; x < (SCREEN_WIDTH / TILE_SIZE)+1; x++)
@@ -257,7 +267,7 @@ int World::PixelYToDisplayPixelY(int pixelY)
     return (pixelY - offsetY);
 }
 
-void World::MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction)
+bool World::MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction)
 {
     int savedX = pMonster->x;
     int savedY = pMonster->y;
@@ -304,6 +314,8 @@ void World::MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction)
         pMonster->x = savedX;
         pMonster->y = savedY;
     }
+
+    return !moveBack;
 }
 
 void World::MonsterAttack(shared_ptr<Monster> pMonster)

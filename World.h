@@ -6,6 +6,7 @@
 #include "Tile.h"
 #include <vector>
 #include <memory>
+#include <algorithm>
 using namespace std;
 
 #define SCREEN_WIDTH 240
@@ -29,7 +30,7 @@ public:
     int TileYToDisplayPixelY(int tileY);
     int PixelXToDisplayPixelX(int pixelX);
     int PixelYToDisplayPixelY(int pixelY);
-    void MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction);
+    bool MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction);
     void MonsterAttack(shared_ptr<Monster> pMonster);
     int DrawTextBox(TTF_Font* font, const char* szText);
 

@@ -37,6 +37,7 @@ public:
     void FreeImage(const char* szImageFile);
     void BlitImage(SDL_Surface* img, int x, int y);
     void BlitImage(SDL_Surface* img, int srcX, int srcY, int w, int h, int x, int y);
+    SDL_Surface* GetImageFromSheet(SDL_Surface* img, int srcX, int srcY, int w, int h);
     void DrawRect(int x, int y, int width, int height, SDLColor color, RECTANGLE_TYPE rectangleType = RECTANGLE_TYPE::FILLED, int rad = 5);
     void FrameRateDelay();
     SDL_Surface* GetSurface();

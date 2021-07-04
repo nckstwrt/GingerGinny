@@ -5,8 +5,6 @@ Monster::Monster() :
     width(0), height(0),
     facingRight(true),
     AI(false),
-    targetX(-1),
-    targetY(-1),
     imgCurrentFrame(NULL),
     walking(false),
     attacking(false)
@@ -72,6 +70,48 @@ void Monster::Move(DIRECTION direction)
     }
 }
 
+void Monster::MoveTo(int moveToX, int moveToY)
+{
+    directions = queue<DIRECTION>();
+
+    // Move from feet to target
+    int x0 = x + (width/2);
+    int y0 = (y + height)-10;
+
+    int x1 = moveToX;
+    int y1 = moveToY;
+
+    int sx = 0;
+    int sy = 0;
+
+    int dx = abs(x1 - x0);
+    sx = x0 < x1 ? 1 : -1;
+    int dy = -1 * abs(y1 - y0);
+    sy = y0 < y1 ? 1 : -1;
+    int err = dx + dy, e2; /* error value e_xy */
+
+    for (;;) 
+    {  
+        if (x0 == x1 && y0 == y1) 
+            break;
+        e2 = 2 * err;
+        if (e2 >= dy) 
+        { 
+            err += dy; 
+            x0 += sx; 
+            directions.push(sx > 0 ? DIRECTION::Right : DIRECTION::Left);
+        } 
+        if (e2 <= dx) 
+        { 
+            err += dx; 
+            y0 += sy; 
+            directions.push(sy > 0 ? DIRECTION::Down : DIRECTION::Up);
+        } 
+    }
+}
+
+
+
 void Monster::Attack()
 {
     attacking = true;
@@ -79,44 +119,6 @@ void Monster::Attack()
 
 void Monster::Update()
 {
-    if (AI)
-    {
-        if (targetX >= -1)
-        {
-            if (x == targetX && y == targetY || (targetX == -1 || targetY == -1))
-            {
-                if ((rand() % 3) == 0)
-                {
-                    targetX = -100;
-                    walking = false;
-                }
-                else
-                {
-                    targetX = rand() % (240 - 32);
-                    targetY = rand() % (240 - 32);
-                }
-            }
-
-            if (targetX >= 0)
-            {
-                double xDirection = targetX - x;
-                double yDirection = targetY - y;
-
-                double magnitude = sqrt(xDirection * xDirection + yDirection * yDirection);
-
-                double xUnit = xDirection / magnitude;
-                double yUnit = yDirection / magnitude;
-
-                x = (int)((((double)x) + xUnit) + 0.5);
-                y = (int)((((double)y) + yUnit) + 0.5);
-                facingRight = xDirection > 0;
-                walking = true;
-            }
-        }
-        else
-            targetX++;
-    }
-
     if (attacking)
     {
         imgCurrentFrame = animations[ANIMATION::Attack].CurrentImage(facingRight);

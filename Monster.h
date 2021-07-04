@@ -6,6 +6,7 @@
 #include "Animation.h"
 #include <map>
 #include <memory>
+#include <queue>
 using namespace std;
 
 class Monster
@@ -17,6 +18,7 @@ public:
     Animation* AddAnimationImages(ANIMATION animation, int imageCycleDelay, int imageCount, ...);
 
     void Move(DIRECTION direction);
+    void MoveTo(int moveToX, int moveToY);
     void Attack();
     void Update();
     SDL_Surface* GetCurrentFrame();
@@ -28,14 +30,13 @@ public:
     int height;
     bool facingRight;
     bool AI;
-    int targetX;
-    int targetY;
+    bool walking;
+    bool attacking;
+    queue<DIRECTION> directions;
 
 private:
     SDL_Surface* imgCurrentFrame;
     map<ANIMATION, Animation> animations;
-    bool walking;
-    bool attacking;
 };
 
 
