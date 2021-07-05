@@ -1,4 +1,5 @@
 #include "Monster.h"
+#include "SDLGame.h"
 
 Monster::Monster() :
     x(0), y(0),
@@ -14,10 +15,6 @@ Monster::Monster() :
 Monster::Monster(const Monster& monster)
 {
     *this = monster;
-    for (map<ANIMATION, Animation>::iterator iter = this->animations.begin(); iter != this->animations.end(); iter++)
-    {
-        iter->second.MakeMaster(false);
-    }
 }
 
 Animation* Monster::AddAnimationImages(ANIMATION animationType, int imageCycleDelay, int imageCount, ...)
@@ -29,7 +26,8 @@ Animation* Monster::AddAnimationImages(ANIMATION animationType, int imageCycleDe
 
     for (int i = 0; i < imageCount; i++)
     {
-        animation.AddImage(imageCount, i, va_arg(vl, SDL_Surface*), imageCycleDelay);
+        SDL_Surface* img = va_arg(vl, SDL_Surface*);
+        animation.AddImage(img, SDLGame::CreateHorizontallyFlippedImage(img), imageCycleDelay);
         if (width == 0 || height == 0)
         {
             width = animation.CurrentImage()->w;
@@ -38,7 +36,6 @@ Animation* Monster::AddAnimationImages(ANIMATION animationType, int imageCycleDe
     }
 
     animations[animationType] = animation;
-    animations[animationType].MakeMaster();
 
     va_end(vl);
 

@@ -1,4 +1,5 @@
 #include "World.h"
+#include "Helper.h"
 
 World::World(SDLGame* pGame) :
     pGame(pGame),
@@ -36,7 +37,7 @@ void World::FreeTileMap()
 void World::LoadMap(const char* szMapFile)
 {
     vector<Tile> tiles;
-    char szImage[100];
+    char szImage[100] = { 0 };
     int x, y;
     tileMapWidth = tileMapHeight = 0;
     FILE* f = fopen(szMapFile, "rt");
@@ -49,14 +50,41 @@ void World::LoadMap(const char* szMapFile)
         if (y > tileMapHeight)
             tileMapHeight = y;
         Tile tile(x, y);
-        tile.image = pGame->GetLoadedImage(szImage);
         tile.tileType = (strstr(szImage, "wall") == NULL) ? TILE_TYPE::FLOOR : TILE_TYPE::WALL;
 
-        if (tile.image == NULL)
+        // If it's an animation load all 3 frames
+        if (strstr(szImage, "_f0"))
         {
-            string tileDirectory = "images/DungeonTilesetII_v1.4/";
-            tile.image = pGame->LoadImage((tileDirectory + szImage).c_str());
+            string animImages = szImage;
+            int imageSpeed = 15;
+            int imageCount = 3;
+
+            if (strstr(szImage, "spikes"))
+            {
+                imageSpeed = 10;
+                imageCount = 4;
+            }
+
+            Helper::string_replace(animImages, "_f0", "_f%d");
+            for (int i = 0; i < imageCount; i++)
+            {
+                string imageFile = Helper::string_format(animImages, i);
+                tile.animation.AddImage(pGame->GetLoadedImage(imageFile.c_str(), "images/DungeonTilesetII_v1.4"), NULL, imageSpeed);
+            }
+
+            if (strstr(szImage, "spikes"))
+            {
+                tile.animation.SetAnimationDelay(0, 300);
+                for (int i = 3; i != 0; i--)
+                {
+                    string imageFile = Helper::string_format(animImages, i);
+                    tile.animation.AddImage(pGame->GetLoadedImage(imageFile.c_str(), "images/DungeonTilesetII_v1.4"), NULL, imageSpeed);
+                }
+            }
         }
+        else
+            tile.animation.AddImage(pGame->GetLoadedImage(szImage, "images/DungeonTilesetII_v1.4"), NULL, 100);
+
         tiles.push_back(tile);
     }
     fclose(f);
@@ -186,7 +214,7 @@ void World::Draw()
                     for (int i = 0; i < MAX_TILE_PER_SQUARE; i++)
                     {
                         Tile* pTile = &tileMap[startTileY + y][startTileX + x][i];
-                        if (pTile != NULL && pTile->image != NULL)
+                        if (pTile != NULL && pTile->GetCurrentImage() != NULL)
                         {
                             int pixelX = TileXToDisplayPixelX(pTile->x);
                             int pixelY = TileYToDisplayPixelY(pTile->y);
@@ -197,7 +225,7 @@ void World::Draw()
                             }
                             else
                             if ((pTile->tileType == TILE_TYPE::FLOOR || (startTileY + y + 2 < tileMapHeight && tileMap[startTileY + y + 2][startTileX + x] != NULL)) && pTile->tileType != TILE_TYPE::WALL_ALWAYS_ON_TOP)
-                                pGame->BlitImage(pTile->image, pixelX, pixelY);
+                                pGame->BlitImage(pTile->GetCurrentImage(), pixelX, pixelY);
                         }
                         else
                             break;
@@ -225,7 +253,7 @@ void World::Draw()
                     for (int i = 0; i < MAX_TILE_PER_SQUARE; i++)
                     {
                         Tile* pTile = &tileMap[startTileY + y][startTileX + x][i];
-                        if (pTile != NULL && pTile->image != NULL)
+                        if (pTile != NULL && pTile->GetCurrentImage() != NULL)
                         {
                             int pixelX = TileXToDisplayPixelX(pTile->x);
                             int pixelY = TileYToDisplayPixelY(pTile->y);
@@ -236,7 +264,7 @@ void World::Draw()
                             }
                             else
                             if (!(pTile->tileType == TILE_TYPE::FLOOR || (startTileY + y + 2 < tileMapHeight && tileMap[startTileY + y + 2][startTileX + x] != NULL)) || pTile->tileType == TILE_TYPE::WALL_ALWAYS_ON_TOP)
-                                pGame->BlitImage(pTile->image, pixelX, pixelY);
+                                pGame->BlitImage(pTile->GetCurrentImage(), pixelX, pixelY);
                         }
                         else
                             break;

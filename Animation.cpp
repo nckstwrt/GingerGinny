@@ -1,61 +1,37 @@
 #include "Animation.h"
 
-Animation::Animation(bool masterAnimation) :
-    masterAnimation(masterAnimation),
+Animation::Animation() :
     currentFrame(0),
     currentImage(0),
-    imageCount(0),
-    imagesRight(NULL),
-    imagesLeft(NULL),
     animationDelays(NULL)
 {
 }
 
-Animation::~Animation()
+void Animation::AddImage(SDL_Surface* img, SDL_Surface* leftImage, int imageDelay)
 {
-    if (masterAnimation)
-    {
-        if (imagesRight)
-            delete[] imagesRight;
-        if (imagesLeft)
-        {
-            for (int i = 0; i < imageCount; i++)
-                SDL_FreeSurface(imagesLeft[i]);
-           delete[] imagesLeft;
-        }
-        if (animationDelays)
-            delete[] animationDelays;
-    }
-}
+    if (img == NULL)
+        printf("Animation::AddImage - img is NULL!!!!\n");
 
-void Animation::AddImage(int imageCount, int imageIndex, SDL_Surface* img, int imageDelay)
-{
-    if (!imagesRight)
-        imagesRight = new SDL_Surface * [imageCount];
-    if (!imagesLeft)
-        imagesLeft = new SDL_Surface * [imageCount];
-    if (!animationDelays)
-        animationDelays = new int[imageCount];
-
-    imagesRight[imageIndex] = img;
-    imagesLeft[imageIndex] = rotozoomSurfaceXY(imagesRight[imageIndex], 0, -1, 1, SMOOTHING_OFF);
-    animationDelays[imageIndex] = imageDelay;
-
-    this->imageCount = imageCount;
+    imagesRight.push_back(img);
+    if (leftImage != NULL)
+        imagesLeft.push_back(leftImage);
+    animationDelays.push_back(imageDelay);
 }
 
 bool Animation::Increment()
 {
     bool endOfCycle = false;
-    currentFrame++;
     if (currentFrame == animationDelays[currentImage])
     {
         currentImage++;
         currentFrame = 0;
     }
-    if (currentImage == imageCount)
+    else
+        currentFrame++;
+    if (currentImage == imagesRight.size())
     {
         currentImage = 0;
+        currentFrame = 0;
         endOfCycle = true;
     }
     return endOfCycle;
@@ -74,9 +50,4 @@ SDL_Surface* Animation::CurrentImage(bool facingRight)
 void Animation::SetAnimationDelay(int imageIndex, int delay)
 {
     animationDelays[imageIndex] = delay;
-}
-
-void Animation::MakeMaster(bool isMaster)
-{
-    masterAnimation = isMaster;
 }

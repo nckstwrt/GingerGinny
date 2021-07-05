@@ -222,13 +222,10 @@
 11 13 floor_3.png
 12 9 floor_5.png
 5 9 floor_4.png
-14 5 floor_1.png
 15 5 floor_1.png
 16 5 floor_1.png
-14 6 floor_1.png
 15 6 floor_1.png
 16 6 floor_1.png
-14 7 floor_1.png
 15 7 floor_1.png
 16 7 floor_1.png
 14 4 wall_corner_front_right.png
@@ -255,7 +252,6 @@
 1 2 wall_corner_left.png
 1 1 wall_corner_top_left.png
 13 1 wall_corner_top_right.png
-14 7 wall_corner_top_right.png
 3 2 wall_banner_blue.png
 6 2 wall_banner_green.png
 9 2 wall_banner_red.png
@@ -268,7 +264,6 @@
 18 10 floor_1.png
 19 10 floor_1.png
 19 9 floor_1.png
-20 9 floor_1.png
 20 10 floor_1.png
 18 9 floor_1.png
 18 8 floor_1.png
@@ -321,3 +316,8 @@
 3 11 floor_5.png
 20 4 wall_fountain_mid_blue_anim_f0.png
 20 5 wall_fountain_basin_blue_anim_f0.png
+14 5 floor_spikes_anim_f0.png
+14 6 floor_spikes_anim_f0.png
+14 7 floor_spikes_anim_f0.png
+14 7 wall_top_right.png
+20 9 floor_ladder.png

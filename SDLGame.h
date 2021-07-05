@@ -33,11 +33,12 @@ public:
     void FlipScreen();
     SDL_Event PollEvents();
     SDL_Surface* LoadImage(const char* szImageFile);
-    SDL_Surface* GetLoadedImage(const char* szImageShortName);
+    SDL_Surface* GetLoadedImage(const char* szImageShortName, const char* szLoadFromDirectory = NULL);
     void FreeImage(const char* szImageFile);
     void BlitImage(SDL_Surface* img, int x, int y);
     void BlitImage(SDL_Surface* img, int srcX, int srcY, int w, int h, int x, int y);
     SDL_Surface* GetImageFromSheet(SDL_Surface* img, int srcX, int srcY, int w, int h);
+    static SDL_Surface* CreateHorizontallyFlippedImage(SDL_Surface* img);
     void DrawRect(int x, int y, int width, int height, SDLColor color, RECTANGLE_TYPE rectangleType = RECTANGLE_TYPE::FILLED, int rad = 5);
     void FrameRateDelay();
     SDL_Surface* GetSurface();
@@ -53,6 +54,7 @@ private:
     SDLFont fonts;
     FPSmanager fpsManager;
     map<string, SDL_Surface*> imageMap;
+    static vector<SDL_Surface*> createdImages;
 };
 
 /*

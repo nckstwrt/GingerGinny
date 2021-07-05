@@ -154,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h" />
+    <ClInclude Include="Helper.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="SDLColor.h" />
     <ClInclude Include="SDLFont.h" />

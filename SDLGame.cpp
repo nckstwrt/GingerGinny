@@ -12,6 +12,10 @@ SDLGame::~SDLGame()
     {
         SDL_FreeSurface(iter->second);
     }
+    for (auto img : createdImages)
+    {
+        SDL_FreeSurface(img);
+    }
 
     if (hw_surface != NULL)
     {
@@ -80,11 +84,21 @@ SDL_Surface* SDLGame::LoadImage(const char* szImageFile)
     return ret;
 }
 
-SDL_Surface* SDLGame::GetLoadedImage(const char* szImageShortName)
+SDL_Surface* SDLGame::GetLoadedImage(const char* szImageShortName, const char *szLoadFromDirectory)
 {
     SDL_Surface* ret = NULL;
     if (imageMap.find(szImageShortName) != imageMap.end())
         ret = imageMap[szImageShortName];
+    else
+    {
+        if (szLoadFromDirectory != NULL)
+        {
+            string dirFile = szLoadFromDirectory;
+            dirFile += "/";
+            dirFile += szImageShortName;
+            ret = LoadImage(dirFile.c_str());
+        }
+    }
     return ret;
 }
 
@@ -126,7 +140,16 @@ SDL_Surface* SDLGame::GetImageFromSheet(SDL_Surface* img, int srcX, int srcY, in
     SDL_SetAlpha(img, 0, 0);
     SDL_BlitSurface(img, &sourceRect, newSurfaceConverted, &targetRect);
 
+    createdImages.push_back(newSurfaceConverted);
+
     return newSurfaceConverted;
+}
+
+SDL_Surface* SDLGame::CreateHorizontallyFlippedImage(SDL_Surface* img)
+{
+    auto newImg = rotozoomSurfaceXY(img, 0, -1, 1, SMOOTHING_OFF);
+    createdImages.push_back(newImg);
+    return newImg;
 }
 
 void SDLGame::DrawRect(int x, int y, int width, int height, SDLColor color, RECTANGLE_TYPE rectangleType, int rad)
@@ -189,3 +212,5 @@ void SDLGame::ResetKeys()
 {
     memset(&keys, 0, sizeof(keys));
 }
+
+vector<SDL_Surface*> SDLGame::createdImages;

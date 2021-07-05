@@ -3,6 +3,8 @@
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_rotozoom.h>
+#include <vector>
+using namespace std;
 
 enum class DIRECTION
 {
@@ -24,24 +26,20 @@ enum class ANIMATION
 class Animation
 {
 public:
-    Animation(bool masterAnimation = false);
-    ~Animation();
+    Animation();
 
-    void AddImage(int imageCount, int imageIndex, SDL_Surface* img, int imageDelay = 6);
+    void AddImage(SDL_Surface* img, SDL_Surface* leftImage,int imageDelay = 6);
     bool Increment();
     void ResetAnimation();
     SDL_Surface* CurrentImage(bool facingRight = true);
     void SetAnimationDelay(int imageIndex, int delay);
-    void MakeMaster(bool isMaster = true);
 
 private:
-    bool masterAnimation;
     int currentImage;
     int currentFrame;
-    int imageCount;
-    SDL_Surface** imagesRight;
-    SDL_Surface** imagesLeft;
-    int* animationDelays;
+    vector<SDL_Surface*> imagesRight;
+    vector<SDL_Surface*> imagesLeft;
+    vector<int> animationDelays;
 };
 
 #endif
