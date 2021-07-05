@@ -5,7 +5,7 @@
 #include "World.h"
 #include <SDL/SDL_mixer.h>
 
-//#define PLAY_MUSIC
+#define PLAY_MUSIC
 
 int main(int argc, char* argv[])
 {
