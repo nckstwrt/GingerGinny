@@ -5,6 +5,7 @@
 #include <SDL/SDL_rotozoom.h>
 #include "Animation.h"
 #include "World.h"
+#include "Helper.h"
 #include <map>
 #include <memory>
 #include <queue>
@@ -21,11 +22,12 @@ public:
     Animation* AddAnimationImages(ANIMATION animation, int imageCycleDelay, int imageCount, ...);
 
     void Move(DIRECTION direction);
-    void MoveTo(int moveToX, int moveToY);
+    void MoveTo(int moveToX, int moveToY, bool carryOnFromLastDirection = false);
     void Attack();
     void Update();
     SDL_Surface* GetCurrentFrame();
     bool CheckOverlap(shared_ptr<Monster> p2);
+    Rect GetRect(bool justFeet = false);
 
     int x;
     int y;
@@ -37,6 +39,8 @@ public:
     bool attacking;
     queue<DIRECTION> directions;
     World* pWorld;
+    int lastMoveToX;
+    int lastMoveToY;
 
 private:
     SDL_Surface* imgCurrentFrame;

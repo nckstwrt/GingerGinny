@@ -369,7 +369,8 @@ vector<Point> World::MonsterMoveTo(shared_ptr<Monster> pMonster, int x, int y)
     pathFinder.clearMonsters();
     for (auto& monster : monsters)
     {
-        pathFinder.addMonster({ monster->x / TILE_SIZE, monster->y / TILE_SIZE });
+        Rect monsterFeet = monster->GetRect(true);
+        pathFinder.addMonster({ monsterFeet.x / TILE_SIZE, monsterFeet.y / TILE_SIZE }, { (monsterFeet.x+ monsterFeet.width) / TILE_SIZE, (monsterFeet.y+ monsterFeet.height) / TILE_SIZE });
     }
 
     // If we are moving to a spot with a monster, remove that as a blocker
@@ -385,8 +386,9 @@ vector<Point> World::MonsterMoveTo(shared_ptr<Monster> pMonster, int x, int y)
     }
     reverse(ret.begin(), ret.end());
     
-    if (ret.size() > 1)
-        pMonster->MoveTo(ret[1].x, ret[1].y);
+    //if (ret.size() > 1)
+    for (unsigned int i = 0; i < ret.size(); i++)
+        pMonster->MoveTo(ret[i].x, ret[i].y, i != 0);
 
     return ret;
 }

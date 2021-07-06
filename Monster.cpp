@@ -9,7 +9,8 @@ Monster::Monster() :
     imgCurrentFrame(NULL),
     walking(false),
     attacking(false),
-    pWorld(NULL)
+    pWorld(NULL),
+    lastMoveToX(0), lastMoveToY(0)
 {
 }
 
@@ -68,13 +69,23 @@ void Monster::Move(DIRECTION direction)
     }
 }
 
-void Monster::MoveTo(int moveToX, int moveToY)
+void Monster::MoveTo(int moveToX, int moveToY, bool carryOnFromLastDirection)
 {
-    directions = queue<DIRECTION>();
+    int x0, y0;
 
-    // Move from feet to target
-    int x0 = x + (width/2);
-    int y0 = (y + height)-10;
+    if (carryOnFromLastDirection)
+    {
+        x0 = lastMoveToX;
+        y0 = lastMoveToY;
+    }
+    else
+    {
+        directions = queue<DIRECTION>();
+
+        // Move from feet to target
+        x0 = x + (width / 2);
+        y0 = (y + height) - 10;
+    }
 
     int x1 = moveToX;
     int y1 = moveToY;
@@ -106,6 +117,9 @@ void Monster::MoveTo(int moveToX, int moveToY)
             directions.push(sy > 0 ? DIRECTION::Down : DIRECTION::Up);
         } 
     }
+
+    lastMoveToX = moveToX;
+    lastMoveToY = moveToY;
 }
 
 void Monster::Attack()
@@ -150,22 +164,25 @@ SDL_Surface* Monster::GetCurrentFrame()
 
 bool Monster::CheckOverlap(shared_ptr<Monster> p2)
 {
-    SDL_Rect m1 = { .x = (Sint16)x, .y = (Sint16)y, .w = (Uint16)width, .h = (Uint16)height };
-    SDL_Rect m2 = { .x = (Sint16)p2->x, .y = (Sint16)p2->y, .w = (Uint16)p2->width, .h = (Uint16)p2->height };
+    auto m1 = GetRect(true);
+    auto m2 = p2->GetRect(true);
 
-    // Make it so only their feet (10 pixels worth) actually cause overlap
-    m1.y = (m1.y + m1.h) - 10;
-    m1.h = 10;
-    m2.y = (m2.y + m2.h) - 10;
-    m2.h = 10;
-  
-    // Shrink the x boundaries to give a little overlap
-    m1.x += 3;
-    m1.w -= 6;
-    m2.x += 3;
-    m2.w -= 6;
+    return m1.IntersectsRect(m2);
+}
 
+Rect Monster::GetRect(bool justFeet)
+{
+    Rect rect(x, y, width, height);
 
-    return (m1.x < (m2.x + m2.w) && (m1.x + m1.w) > m2.x && m1.y < (m2.y + m2.h) && (m1.y + m1.h) > m2.y);
+    // Shrink the monster to just skinny "feet"
+    if (justFeet)
+    {
+        rect.y = (rect.y + rect.height) - 10;
+        rect.height = 10;
+        rect.x += 3;
+        rect.width -= 6;
+    }
+
+    return rect;
 }
 

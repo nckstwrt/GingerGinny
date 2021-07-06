@@ -10,27 +10,21 @@
 #include <functional>
 #include <set>
 #include <memory>
+#include "Helper.h"
 
 namespace AStar
 {
-    struct Vec2i
-    {
-        int x, y;
-
-        bool operator == (const Vec2i& coordinates_);
-    };
-
     using uint = unsigned int;
-    using HeuristicFunction = std::function<uint(Vec2i, Vec2i)>;
-    using CoordinateList = std::vector<Vec2i>;
+    using HeuristicFunction = std::function<uint(Point, Point)>;
+    using CoordinateList = std::vector<Point>;
 
     struct Node
     {
         uint G, H;
-        Vec2i coordinates;
+        Point coordinates;
         Node *parent;
 
-        Node(Vec2i coord_, Node *parent_ = nullptr);
+        Node(Point coord_, Node *parent_ = nullptr);
         uint getScore();
     };
 
@@ -39,37 +33,37 @@ namespace AStar
     class Generator
     {
         bool checkWall(int x, int y);
-        bool detectCollision(Vec2i previousCoordinates_, Vec2i direction_, Vec2i coordinates_);
-        Node* findNodeOnList(NodeSet& nodes_, Vec2i coordinates_);
+        bool detectCollision(Point previousCoordinates_, Point direction_, Point coordinates_);
+        Node* findNodeOnList(NodeSet& nodes_, Point coordinates_);
         void releaseNodes(NodeSet& nodes_);
 
     public:
         Generator();
-        void setWorldSize(Vec2i worldSize_);
+        void setWorldSize(Point worldSize_);
         void setDiagonalMovement(bool enable_);
         void setHeuristic(HeuristicFunction heuristic_);
-        CoordinateList findPath(Vec2i source_, Vec2i target_, int maxIterations_ = 300);
-        void addWall(Vec2i coordinates_);
-        void addMonster(Vec2i coordinates_);
-        void removeMonster(Vec2i coordinates_);
+        CoordinateList findPath(Point source_, Point target_, int maxIterations_ = 300);
+        void addWall(Point coordinates_);
+        void addMonster(Point coordinates1, Point coordinates2);
+        void removeMonster(Point coordinates_);
         void clearMonsters();
 
     private:
         HeuristicFunction heuristic;
         CoordinateList direction, monsters;
-        Vec2i worldSize;
+        Point worldSize;
         std::unique_ptr<bool[]> walls;
         uint directions;
     };
 
     class Heuristic
     {
-        static Vec2i getDelta(Vec2i source_, Vec2i target_);
+        static Point getDelta(Point source_, Point target_);
 
     public:
-        static uint manhattan(Vec2i source_, Vec2i target_);
-        static uint euclidean(Vec2i source_, Vec2i target_);
-        static uint octagonal(Vec2i source_, Vec2i target_);
+        static uint manhattan(Point source_, Point target_);
+        static uint euclidean(Point source_, Point target_);
+        static uint octagonal(Point source_, Point target_);
     };
 }
 

@@ -3,17 +3,7 @@
 
 using namespace std::placeholders;
 
-bool AStar::Vec2i::operator == (const Vec2i& coordinates_)
-{
-    return (x == coordinates_.x && y == coordinates_.y);
-}
-
-AStar::Vec2i operator + (const AStar::Vec2i& left_, const AStar::Vec2i& right_)
-{
-    return{ left_.x + right_.x, left_.y + right_.y };
-}
-
-AStar::Node::Node(Vec2i coordinates_, Node *parent_)
+AStar::Node::Node(Point coordinates_, Node *parent_)
 {
     parent = parent_;
     coordinates = coordinates_;
@@ -35,7 +25,7 @@ AStar::Generator::Generator()
     };
 }
 
-void AStar::Generator::setWorldSize(Vec2i worldSize_)
+void AStar::Generator::setWorldSize(Point worldSize_)
 {
     worldSize = worldSize_;
     walls = std::make_unique<bool[]>(worldSize.x * worldSize.y);
@@ -51,17 +41,19 @@ void AStar::Generator::setHeuristic(HeuristicFunction heuristic_)
     heuristic = std::bind(heuristic_, _1, _2);
 }
 
-void AStar::Generator::addWall(Vec2i coordinates_)
+void AStar::Generator::addWall(Point coordinates_)
 {
     walls[coordinates_.x + (coordinates_.y * worldSize.x)] = true;
 }
 
-void AStar::Generator::addMonster(Vec2i coordinates_)
+void AStar::Generator::addMonster(Point coordinates1, Point coordinates2)
 {
-    monsters.push_back(coordinates_);
+    for (int y = coordinates1.y; y <= coordinates2.y; y++)
+        for (int x = coordinates1.x; x <= coordinates2.x; x++)
+            monsters.push_back({ x, y });
 }
 
-void AStar::Generator::removeMonster(Vec2i coordinates_)
+void AStar::Generator::removeMonster(Point coordinates_)
 {
     auto it = std::find(monsters.begin(), monsters.end(), coordinates_);
     if (it != monsters.end()) {
@@ -79,7 +71,7 @@ bool AStar::Generator::checkWall(int x, int y)
     return walls[x + (y * worldSize.x)];
 }
 
-bool AStar::Generator::detectCollision(Vec2i previousCoordinates_, Vec2i direction_, Vec2i coordinates_)
+bool AStar::Generator::detectCollision(Point previousCoordinates_, Point direction_, Point coordinates_)
 {
     if (coordinates_.x < 0 || coordinates_.x >= worldSize.x ||
         coordinates_.y < 0 || coordinates_.y >= worldSize.y || 
@@ -102,7 +94,7 @@ bool AStar::Generator::detectCollision(Vec2i previousCoordinates_, Vec2i directi
     return false;
 }
 
-AStar::CoordinateList AStar::Generator::findPath(Vec2i source_, Vec2i target_, int maxIterations_)
+AStar::CoordinateList AStar::Generator::findPath(Point source_, Point target_, int maxIterations_)
 {
     Node *current = nullptr;
     NodeSet openSet, closedSet;
@@ -134,9 +126,9 @@ AStar::CoordinateList AStar::Generator::findPath(Vec2i source_, Vec2i target_, i
         openSet.erase(current_it);
 
         for (uint i = 0; i < directions; ++i) {
-            Vec2i newCoordinates(current->coordinates + direction[i]);
+            Point newCoordinates(current->coordinates + direction[i]);
 
-            if ((newCoordinates != target_ && detectCollision(current->coordinates, direction[i], newCoordinates)) ||
+            if ((!(newCoordinates == target_) && detectCollision(current->coordinates, direction[i], newCoordinates)) ||
                 findNodeOnList(closedSet, newCoordinates)) {
                 continue;
             }
@@ -169,7 +161,7 @@ AStar::CoordinateList AStar::Generator::findPath(Vec2i source_, Vec2i target_, i
     return path;
 }
 
-AStar::Node* AStar::Generator::findNodeOnList(NodeSet& nodes_, Vec2i coordinates_)
+AStar::Node* AStar::Generator::findNodeOnList(NodeSet& nodes_, Point coordinates_)
 {
     for (auto node : nodes_) {
         if (node->coordinates == coordinates_) {
@@ -187,24 +179,24 @@ void AStar::Generator::releaseNodes(NodeSet& nodes_)
     }
 }
 
-AStar::Vec2i AStar::Heuristic::getDelta(Vec2i source_, Vec2i target_)
+Point AStar::Heuristic::getDelta(Point source_, Point target_)
 {
     return{ abs(source_.x - target_.x),  abs(source_.y - target_.y) };
 }
 
-AStar::uint AStar::Heuristic::manhattan(Vec2i source_, Vec2i target_)
+AStar::uint AStar::Heuristic::manhattan(Point source_, Point target_)
 {
     auto delta = std::move(getDelta(source_, target_));
     return static_cast<uint>(10 * (delta.x + delta.y));
 }
 
-AStar::uint AStar::Heuristic::euclidean(Vec2i source_, Vec2i target_)
+AStar::uint AStar::Heuristic::euclidean(Point source_, Point target_)
 {
     auto delta = std::move(getDelta(source_, target_));
     return static_cast<uint>(10 * sqrt(pow(delta.x, 2) + pow(delta.y, 2)));
 }
 
-AStar::uint AStar::Heuristic::octagonal(Vec2i source_, Vec2i target_)
+AStar::uint AStar::Heuristic::octagonal(Point source_, Point target_)
 {
     auto delta = std::move(getDelta(source_, target_));
     return 10 * (delta.x + delta.y) + (-6) * std::min(delta.x, delta.y);
