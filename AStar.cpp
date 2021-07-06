@@ -1,5 +1,6 @@
 #include "AStar.h"
 #include <algorithm>
+#include <math.h>
 
 using namespace std::placeholders;
 
