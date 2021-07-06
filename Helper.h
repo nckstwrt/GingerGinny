@@ -29,4 +29,24 @@ public:
     }
 };
 
+class Point
+{
+public:
+    Point() : Point(-1, -1)
+    {
+    }
+
+    Point(int x, int y) : x(x), y(y)
+    {
+    }
+
+    bool operator== (const Point& rhs)
+    {
+        return (x == rhs.x && y == rhs.y);
+    }
+
+    int x;
+    int y;
+};
+
 #endif

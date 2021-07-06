@@ -4,10 +4,13 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_rotozoom.h>
 #include "Animation.h"
+#include "World.h"
 #include <map>
 #include <memory>
 #include <queue>
 using namespace std;
+
+class World;
 
 class Monster
 {
@@ -33,6 +36,7 @@ public:
     bool walking;
     bool attacking;
     queue<DIRECTION> directions;
+    World* pWorld;
 
 private:
     SDL_Surface* imgCurrentFrame;

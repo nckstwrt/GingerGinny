@@ -1,5 +1,4 @@
 #include "World.h"
-#include "Helper.h"
 
 World::World(SDLGame* pGame) :
     pGame(pGame),
@@ -92,9 +91,9 @@ void World::LoadMap(const char* szMapFile)
     // Now set up the tileMap for easy access
     tileMapWidth++;
     tileMapHeight++;
-    tileMap = new Tile**[tileMapHeight]();
+    tileMap = new Tile * *[tileMapHeight]();
     for (int y = 0; y < tileMapHeight; y++)
-        tileMap[y] = new Tile*[tileMapWidth]();
+        tileMap[y] = new Tile * [tileMapWidth]();
     for (vector<Tile>::iterator iter = tiles.begin(); iter != tiles.end(); iter++)
     {
         if (tileMap[iter->y][iter->x] == NULL)
@@ -111,6 +110,11 @@ void World::LoadMap(const char* szMapFile)
         }
     }
 
+    // Now make our pathfinder
+    pathFinder.setDiagonalMovement(true);
+    pathFinder.setHeuristic(AStar::Heuristic::euclidean);
+    pathFinder.setWorldSize({ tileMapWidth, tileMapHeight });
+
     // Now force some walls to be on top
     for (int y = 0; y < tileMapHeight; y++)
     {
@@ -121,10 +125,20 @@ void World::LoadMap(const char* szMapFile)
                 if (SafeGetTile(x, y, i)->tileType == TILE_TYPE::WALL &&
                     (SafeGetTile(x + 1, y + 2, 0)->tileType == TILE_TYPE::EMPTY || SafeGetTile(x - 1, y + 2, 0)->tileType == TILE_TYPE::EMPTY) &&
                     SafeGetTile(x, y - 1, 0)->tileType == TILE_TYPE::FLOOR)
+                {
+                    SafeGetTile(x, y, i)->tileType = TILE_TYPE::WALL_ALWAYS_ON_TOP;
+                    //SafeGetTile(x, y - 1, 0)->tileType = TILE_TYPE::DEBUG;
+                }
+                if (i == 0)
+                {
+                    if (/*SafeGetTile(x, y, 0)->tileType != TILE_TYPE::WALL &&*/ SafeGetTile(x, y, 0)->tileType != TILE_TYPE::FLOOR)
                     {
-                        SafeGetTile(x, y, i)->tileType = TILE_TYPE::WALL_ALWAYS_ON_TOP;
-                        //SafeGetTile(x, y - 1, 0)->tileType = TILE_TYPE::DEBUG;
+                        pathFinder.addWall({ x, y });
                     }
+                }
+                else
+                    if (SafeGetTile(x, y, i)->tileType == TILE_TYPE::WALL_ALWAYS_ON_TOP)
+                        pathFinder.addWall({ x, y });
             }
         }
     }
@@ -152,6 +166,7 @@ shared_ptr<Monster> World::AddMonster(const Monster &monsterToCopy, int tileX, i
     newMonster->x = tileX;
     newMonster->y = tileY;
     newMonster->facingRight = facingRight;
+    newMonster->pWorld = this;
     //newMonster.AI = true;
     monsters.push_back(newMonster);
     if (monsters.size() == 1)
@@ -162,7 +177,7 @@ shared_ptr<Monster> World::AddMonster(const Monster &monsterToCopy, int tileX, i
 void World::Update()
 {
     // Update all Monsters
-    for (auto monster : monsters)
+    for (auto &monster : monsters)
     {
         // If has directions to go to, move the monster
         if (monster->directions.size() > 0)
@@ -236,7 +251,7 @@ void World::Draw()
     }
 
     // Draw monsters
-    for (auto monster : monsters)
+    for (auto &monster : monsters)
     {
         pGame->BlitImage(monster->GetCurrentFrame(), PixelXToDisplayPixelX(monster->x), PixelYToDisplayPixelY(monster->y));
     }
@@ -295,14 +310,14 @@ int World::PixelYToDisplayPixelY(int pixelY)
     return (pixelY - offsetY);
 }
 
-bool World::MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction)
+bool World::MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction, bool alwaysMoveBack)
 {
     int savedX = pMonster->x;
     int savedY = pMonster->y;
     pMonster->Move(direction);
 
     int monsterX1 = pMonster->x - 4;
-    int monsterX2 = pMonster->x + pMonster->width + 6;
+    int monsterX2 = pMonster->x + (pMonster->width + 6);
     int monsterY = pMonster->y + pMonster->height - 8;
     
     bool moveBack = false;
@@ -324,7 +339,7 @@ bool World::MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction)
     // Check for monsters
     if (!moveBack)
     {
-        for (auto monster : monsters)
+        for (auto &monster : monsters)
         {
             if (pMonster != monster)
             {
@@ -337,13 +352,43 @@ bool World::MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction)
         }
     }
 
-    if (moveBack)
+    if (moveBack || alwaysMoveBack)
     {
         pMonster->x = savedX;
         pMonster->y = savedY;
     }
 
     return !moveBack;
+}
+
+vector<Point> World::MonsterMoveTo(shared_ptr<Monster> pMonster, int x, int y)
+{
+    vector<Point> ret;
+   
+    // Remove previously placed monsters (as they may have removed)
+    pathFinder.clearMonsters();
+    for (auto& monster : monsters)
+    {
+        pathFinder.addMonster({ monster->x / TILE_SIZE, monster->y / TILE_SIZE });
+    }
+
+    // If we are moving to a spot with a monster, remove that as a blocker
+    pathFinder.removeMonster({ x / TILE_SIZE, y / TILE_SIZE });
+
+    // Run the A* Search
+    auto path = pathFinder.findPath({ (pMonster->x + (pMonster->width / 2)) / TILE_SIZE, ((pMonster->y + pMonster->height) - 5) / TILE_SIZE }, { x / TILE_SIZE, y / TILE_SIZE });
+    
+    // Move the returned path into the centre of the tiles
+    for (auto& p : path)
+    {
+        ret.push_back(Point((p.x * TILE_SIZE) + TILE_SIZE/2, (p.y * TILE_SIZE) + TILE_SIZE / 2));
+    }
+    reverse(ret.begin(), ret.end());
+    
+    if (ret.size() > 1)
+        pMonster->MoveTo(ret[1].x, ret[1].y);
+
+    return ret;
 }
 
 void World::MonsterAttack(shared_ptr<Monster> pMonster)

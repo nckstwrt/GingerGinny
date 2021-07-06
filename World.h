@@ -4,6 +4,8 @@
 #include "SDLGame.h"
 #include "Monster.h"
 #include "Tile.h"
+#include "Helper.h"
+#include "AStar.h"
 #include <vector>
 #include <memory>
 #include <algorithm>
@@ -13,6 +15,8 @@ using namespace std;
 #define SCREEN_HEIGHT 240
 #define TILE_SIZE 16
 #define MAX_TILE_PER_SQUARE 3
+
+class Monster;
 
 class World
 {
@@ -30,10 +34,12 @@ public:
     int TileYToDisplayPixelY(int tileY);
     int PixelXToDisplayPixelX(int pixelX);
     int PixelYToDisplayPixelY(int pixelY);
-    bool MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction);
+    bool MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction, bool alwaysMoveBack = false);
+    vector<Point> MonsterMoveTo(shared_ptr<Monster> pMonster, int x, int y);
     void MonsterAttack(shared_ptr<Monster> pMonster);
     int DrawTextBox(TTF_Font* font, const char* szText);
 
+    AStar::Generator pathFinder;
     int offsetX;
     int offsetY;
     SDLGame* pGame;

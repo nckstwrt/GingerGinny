@@ -8,7 +8,8 @@ Monster::Monster() :
     AI(false),
     imgCurrentFrame(NULL),
     walking(false),
-    attacking(false)
+    attacking(false),
+    pWorld(NULL)
 {
 }
 
@@ -106,8 +107,6 @@ void Monster::MoveTo(int moveToX, int moveToY)
         } 
     }
 }
-
-
 
 void Monster::Attack()
 {

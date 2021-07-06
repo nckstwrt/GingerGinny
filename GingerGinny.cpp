@@ -5,7 +5,7 @@
 #include "World.h"
 #include <SDL/SDL_mixer.h>
 
-#define PLAY_MUSIC
+//#define PLAY_MUSIC
 
 int main(int argc, char* argv[])
 {
@@ -16,9 +16,9 @@ int main(int argc, char* argv[])
     SDLFont fonts;
 
     // Harry Potter Music :)
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
+    Mix_Init(MIX_INIT_OGG | MIX_INIT_MP3);
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 1, 4096) == -1)
         return -1;
-    Mix_VolumeMusic(15);
     Mix_Music* musicTMNT = NULL;
 #ifdef PLAY_MUSIC
     musicTMNT = Mix_LoadMUS("tmnt.ogg");
@@ -109,18 +109,20 @@ int main(int argc, char* argv[])
     Game.ResetKeys();
 
     // Stop TMNT theme start hp theme
-    Mix_FadeOutMusic(200);
-    SDL_Delay(200);
-    Mix_VolumeMusic(128);
+    while (!Mix_FadeOutMusic(300) && Mix_PlayingMusic())
+        SDL_Delay(50);
     Mix_Music* musicHP = NULL;
 #ifdef PLAY_MUSIC
     musicHP = Mix_LoadMUS("hp.ogg");
+    if (musicHP == NULL)
+        printf("HP Music Error: %s\n", Mix_GetError());
 #endif
     if (musicHP != NULL)
-        Mix_PlayMusic(musicHP, -1);
+      Mix_PlayMusic(musicHP, -1);
 
     // Run Game
     bool showText = true;
+    vector<Point> points;
     while (runGame)
     {
         Game.ClearScreen();
@@ -150,12 +152,26 @@ int main(int argc, char* argv[])
         }
         if (Game.keys[SDLK_b])
         {
-            pOgre->MoveTo(pGinny->x+(pGinny->width/2), (pGinny->y+pGinny->height)-10);
+            //pOgre->MoveTo(pGinny->x+(pGinny->width/2), (pGinny->y+pGinny->height)-10);
+            points = World.MonsterMoveTo(pOgre, pGinny->x + (pGinny->width / 2), (pGinny->y + pGinny->height) - 10);
+            Game.keys[SDLK_b] = false;
         }
-        
+        if (Game.keys[SDLK_c])
+        {
+            shared_ptr<Monster> temp = pGinny;
+            pGinny = pOgre;
+            pOgre = temp;
+            World.pCameraFollow = pGinny;
+            Game.keys[SDLK_c] = false;
+        }
 
         World.Update();
         World.Draw();
+
+        for (auto& point : points)
+        {
+            pixelRGBA(hw_surface, World.PixelXToDisplayPixelX(point.x), World.PixelYToDisplayPixelY(point.y), 255, 0, 0, 255);
+        }
 
         //Game.BlitImage(harryPotterSprites, 3, 6, 32-3, 45-6, 30, 30);
 
@@ -163,6 +179,10 @@ int main(int argc, char* argv[])
         if (showText)
         {
             if (World.DrawTextBox(chary, "Teenage Mutant Ginger Ginny is here. And she is.... Evil!") == -1)
+                break;
+            if (World.DrawTextBox(chary, "....Or is she?") == -1)
+                break;
+            if (World.DrawTextBox(chary, "(yes she is!)") == -1)
                 break;
             showText = false;
         }

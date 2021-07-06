@@ -12,7 +12,7 @@ SDLGame::~SDLGame()
     {
         SDL_FreeSurface(iter->second);
     }
-    for (auto img : createdImages)
+    for (auto &img : createdImages)
     {
         SDL_FreeSurface(img);
     }

@@ -145,6 +145,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="AStar.cpp" />
     <ClCompile Include="GingerGinny.cpp" />
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="SDLColor.cpp" />
@@ -154,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h" />
+    <ClInclude Include="AStar.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="SDLColor.h" />
