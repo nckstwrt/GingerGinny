@@ -124,7 +124,6 @@ void Monster::Update()
                     {
                         // We've found Ginny nearby, now let's go chase her if we have line of sight
                         bool lineBroken = false;
-                        vector<Point> pathPoints;
                         Helper::CalcLine(GetMidPoint().x, GetMidPoint().y, monster->GetMidPoint().x, monster->GetMidPoint().y, [this, &lineBroken](int x, int y, int sx, int sy)
                         {
                             if (pWorld->SafeGetTile(x / TILE_SIZE, y / TILE_SIZE, 0)->tileType == TILE_TYPE::WALL_ALWAYS_ON_TOP)
