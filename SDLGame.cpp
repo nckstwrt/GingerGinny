@@ -175,6 +175,11 @@ void SDLGame::DrawRect(int x, int y, int width, int height, SDLColor color, RECT
     }
 }
 
+void SDLGame::DrawPoint(int x, int y, SDLColor color)
+{
+    pixelColor(hw_surface, x, y, color.ReversedUInt());
+}
+
 void SDLGame::FrameRateDelay()
 {
     SDL_framerateDelay(&fpsManager);

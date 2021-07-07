@@ -47,18 +47,23 @@ void AStar::Generator::addWall(Point coordinates_)
     walls[coordinates_.x + (coordinates_.y * worldSize.x)] = true;
 }
 
-void AStar::Generator::addMonster(Point coordinates1, Point coordinates2)
+void AStar::Generator::addMonster(Rect rect)
 {
-    for (int y = coordinates1.y; y <= coordinates2.y; y++)
-        for (int x = coordinates1.x; x <= coordinates2.x; x++)
+    for (int y = rect.y; y <= rect.y + rect.height; y++)
+        for (int x = rect.x; x <= rect.x + rect.width; x++)
             monsters.push_back({ x, y });
 }
 
-void AStar::Generator::removeMonster(Point coordinates_)
+void AStar::Generator::removeMonster(Rect rect)
 {
-    auto it = std::find(monsters.begin(), monsters.end(), coordinates_);
-    if (it != monsters.end()) {
-        monsters.erase(it);
+    for (int y = rect.y; y <= rect.y + rect.height; y++)
+    {
+        for (int x = rect.x; x <= rect.x + rect.width; x++)
+        {
+            auto it = std::find(monsters.begin(), monsters.end(), Point(x, y));
+            if (it != monsters.end())
+                monsters.erase(it);
+        }
     }
 }
 

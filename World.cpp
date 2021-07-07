@@ -288,6 +288,12 @@ void World::Draw()
             }
         }
     }
+
+    // Draw any debug points or rectangles
+    for (auto& point : debugPoints)
+        pGame->DrawPoint(PixelXToDisplayPixelX(point.x), PixelYToDisplayPixelY(point.y), SDLColor(255, 0, 0));
+    for (auto& rect : debugRects)
+        pGame->DrawRect(PixelXToDisplayPixelX(rect.x), PixelYToDisplayPixelY(rect.y), rect.width, rect.height, SDLColor(255, 0, 0));
 }
 
 int World::TileXToDisplayPixelX(int tileX)
@@ -367,17 +373,24 @@ vector<Point> World::MonsterMoveTo(shared_ptr<Monster> pMonster, int x, int y)
    
     // Remove previously placed monsters (as they may have removed)
     pathFinder.clearMonsters();
+
+    // Add all other monsters in
     for (auto& monster : monsters)
     {
         Rect monsterFeet = monster->GetRect(true);
-        pathFinder.addMonster({ monsterFeet.x / TILE_SIZE, monsterFeet.y / TILE_SIZE }, { (monsterFeet.x+ monsterFeet.width) / TILE_SIZE, (monsterFeet.y+ monsterFeet.height) / TILE_SIZE });
+        if (pMonster != monster)
+        {
+            Rect monsterRect = monster->GetRect(true);
+            if (!monsterRect.ContainsPoint(x, y))
+            {
+                monsterRect.DivideBy(TILE_SIZE);
+                pathFinder.addMonster(monsterRect);
+            }
+        }
     }
 
-    // If we are moving to a spot with a monster, remove that as a blocker
-    pathFinder.removeMonster({ x / TILE_SIZE, y / TILE_SIZE });
-
     // Run the A* Search
-    auto path = pathFinder.findPath({ (pMonster->x + (pMonster->width / 2)) / TILE_SIZE, ((pMonster->y + pMonster->height) - 5) / TILE_SIZE }, { x / TILE_SIZE, y / TILE_SIZE });
+    auto path = pathFinder.findPath({ pMonster->GetMidPoint(true).x / TILE_SIZE, pMonster->GetMidPoint(true).y / TILE_SIZE }, { x / TILE_SIZE, y / TILE_SIZE });
     
     // Move the returned path into the centre of the tiles
     for (auto& p : path)
@@ -386,9 +399,9 @@ vector<Point> World::MonsterMoveTo(shared_ptr<Monster> pMonster, int x, int y)
     }
     reverse(ret.begin(), ret.end());
     
-    //if (ret.size() > 1)
-    for (unsigned int i = 0; i < ret.size(); i++)
-        pMonster->MoveTo(ret[i].x, ret[i].y, i != 0);
+    // Skipping the first one seems to help a lot here
+    for (unsigned int i = 1; i < ret.size(); i++)
+        pMonster->MoveTo(ret[i].x, ret[i].y, i != 1);
 
     return ret;
 }

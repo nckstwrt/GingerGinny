@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <stdexcept>
+#include <functional>
 using namespace std;
 
 class Helper
@@ -26,6 +27,37 @@ public:
             return false;
         str.replace(start_pos, from.length(), to);
         return true;
+    }
+
+    static void CalcLine(int x0, int y0, int x1, int y1, std::function<void(int, int, int, int)> callback)
+    {
+        int sx = 0;
+        int sy = 0;
+
+        int dx = abs(x1 - x0);
+        sx = x0 < x1 ? 1 : -1;
+        int dy = -1 * abs(y1 - y0);
+        sy = y0 < y1 ? 1 : -1;
+        int err = dx + dy, e2; 
+
+        for (;;)
+        {
+            if (x0 == x1 && y0 == y1)
+                break;
+            e2 = 2 * err;
+            if (e2 >= dy)
+            {
+                err += dy;
+                x0 += sx;
+                callback(x0, y0, sx, 0);
+            }
+            if (e2 <= dx)
+            {
+                err += dx;
+                y0 += sy;
+                callback(x0, y0, 0, sy);
+            }
+        }
     }
 };
 
@@ -87,15 +119,61 @@ public:
         return ((x < (rhs.x + rhs.width)) && ((x + width) > rhs.x) && (y < (rhs.y + rhs.height)) && ((y + height) > rhs.y));
     }
 
+    bool ContainsPoint(int pointX, int pointY)
+    {
+        return (pointX >= x && pointX <= (x + width) && pointY >= y && pointY <= (y + height));
+    }
+
     bool operator== (const Rect& rhs)
     {
         return (x == rhs.x && y == rhs.y && width == rhs.width && height == rhs.height);
+    }
+
+    void DivideBy(int tileSize)
+    {
+        x /= tileSize;
+        y /= tileSize;
+        width /= tileSize;
+        height /= tileSize;
     }
 
     int x;
     int y;
     int width;
     int height;
+};
+
+class Circle
+{
+public:
+    Circle(int originX, int originY, int radius) : 
+        originX(originX), originY(originY), radius(radius)
+    {
+    }
+
+    bool ContainsPoint(int x, int y)
+    {
+        return ((x - originX) * (x - originX) + (y - originY) * (y - originY) <= radius * radius);
+    }
+
+    vector<Point> GetAllCirclePoints()
+    {
+        vector<Point> points;
+        for (int x = -radius; x < radius; x++)
+        {
+            int height = (int)sqrt(radius * radius - x * x);
+
+            for (int y = -height; y < height; y++)
+            {
+                points.push_back({ x + originX, y + originY });
+            }
+        }
+        return points;
+    }
+
+    int originX;
+    int originY;
+    int radius;
 };
 
 #endif

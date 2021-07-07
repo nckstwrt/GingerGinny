@@ -10,7 +10,9 @@ Monster::Monster() :
     walking(false),
     attacking(false),
     pWorld(NULL),
-    lastMoveToX(0), lastMoveToY(0)
+    lastMoveToX(0), lastMoveToY(0),
+    alignment(Monster::ALIGNMENT::BAD),
+    tickCounter(0)
 {
 }
 
@@ -82,41 +84,19 @@ void Monster::MoveTo(int moveToX, int moveToY, bool carryOnFromLastDirection)
     {
         directions = queue<DIRECTION>();
 
-        // Move from feet to target
-        x0 = x + (width / 2);
-        y0 = (y + height) - 10;
+        x0 = GetMidPoint(true).x;
+        y0 = GetMidPoint(true).y;
     }
 
     int x1 = moveToX;
     int y1 = moveToY;
 
-    int sx = 0;
-    int sy = 0;
-
-    int dx = abs(x1 - x0);
-    sx = x0 < x1 ? 1 : -1;
-    int dy = -1 * abs(y1 - y0);
-    sy = y0 < y1 ? 1 : -1;
-    int err = dx + dy, e2; /* error value e_xy */
-
-    for (;;) 
-    {  
-        if (x0 == x1 && y0 == y1) 
-            break;
-        e2 = 2 * err;
-        if (e2 >= dy) 
-        { 
-            err += dy; 
-            x0 += sx; 
-            directions.push(sx > 0 ? DIRECTION::Right : DIRECTION::Left);
-        } 
-        if (e2 <= dx) 
-        { 
-            err += dx; 
-            y0 += sy; 
-            directions.push(sy > 0 ? DIRECTION::Down : DIRECTION::Up);
-        } 
-    }
+    Helper::CalcLine(x0, y0, x1, y1, [this](int x, int y, int dx, int dy) -> void {
+        if (dx != 0)
+            directions.push(dx > 0 ? DIRECTION::Right : DIRECTION::Left);
+        else
+            directions.push(dy > 0 ? DIRECTION::Down : DIRECTION::Up);
+    });
 
     lastMoveToX = moveToX;
     lastMoveToY = moveToY;
@@ -129,6 +109,37 @@ void Monster::Attack()
 
 void Monster::Update()
 {
+    // If we're a BAD monster look for GOOD players to move towards
+    if ((tickCounter % 10) == 0 && alignment == Monster::ALIGNMENT::BAD && pWorld)
+    {
+        Circle ourRadius(GetMidPoint().x, GetMidPoint().y, 100);
+        auto us = *find_if(pWorld->monsters.begin(), pWorld->monsters.end(), [this](const shared_ptr<Monster>& x) { return x.get() == this; });
+        for (auto &monster : pWorld->monsters)
+        {
+            if (monster.get() != this)
+            {
+                if (monster->alignment == Monster::ALIGNMENT::GOOD)
+                {
+                    if (ourRadius.ContainsPoint(monster->GetMidPoint().x, monster->GetMidPoint().y))
+                    {
+                        // We've found Ginny nearby, now let's go chase her if we have line of sight
+                        bool lineBroken = false;
+                        vector<Point> pathPoints;
+                        Helper::CalcLine(GetMidPoint().x, GetMidPoint().y, monster->GetMidPoint().x, monster->GetMidPoint().y, [this, &lineBroken](int x, int y, int sx, int sy)
+                        {
+                            if (pWorld->SafeGetTile(x / TILE_SIZE, y / TILE_SIZE, 0)->tileType == TILE_TYPE::WALL_ALWAYS_ON_TOP)
+                                lineBroken = true;
+                        });
+                        if (!lineBroken)
+                        {
+                            pWorld->MonsterMoveTo(us, monster->GetMidPoint().x, monster->GetMidPoint(true).y);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     if (attacking)
     {
         imgCurrentFrame = animations[ANIMATION::Attack].CurrentImage(facingRight);
@@ -155,6 +166,8 @@ void Monster::Update()
         }
     }
     walking = false;
+
+    tickCounter++;
 }
 
 SDL_Surface* Monster::GetCurrentFrame()
@@ -184,5 +197,10 @@ Rect Monster::GetRect(bool justFeet)
     }
 
     return rect;
+}
+
+Point Monster::GetMidPoint(bool fromFeet)
+{
+    return Point(x + (width / 2), fromFeet ? ((y + height) - 10) : (y + (height / 2)));
 }
 

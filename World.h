@@ -48,6 +48,9 @@ public:
     int tileMapWidth;
     int tileMapHeight;
     shared_ptr<Monster> pCameraFollow;
+
+    vector<Point> debugPoints;
+    vector<Rect> debugRects;
 };
 
 #endif

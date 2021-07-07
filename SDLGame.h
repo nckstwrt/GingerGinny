@@ -40,6 +40,7 @@ public:
     SDL_Surface* GetImageFromSheet(SDL_Surface* img, int srcX, int srcY, int w, int h);
     static SDL_Surface* CreateHorizontallyFlippedImage(SDL_Surface* img);
     void DrawRect(int x, int y, int width, int height, SDLColor color, RECTANGLE_TYPE rectangleType = RECTANGLE_TYPE::FILLED, int rad = 5);
+    void DrawPoint(int x, int y, SDLColor color);
     void FrameRateDelay();
     SDL_Surface* GetSurface();
     TTF_Font* LoadFont(const char* szFont, int fontSize);

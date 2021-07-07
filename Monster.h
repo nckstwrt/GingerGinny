@@ -9,6 +9,7 @@
 #include <map>
 #include <memory>
 #include <queue>
+#include <algorithm>
 using namespace std;
 
 class World;
@@ -28,6 +29,7 @@ public:
     SDL_Surface* GetCurrentFrame();
     bool CheckOverlap(shared_ptr<Monster> p2);
     Rect GetRect(bool justFeet = false);
+    Point GetMidPoint(bool fromFeet = false);
 
     int x;
     int y;
@@ -42,9 +44,17 @@ public:
     int lastMoveToX;
     int lastMoveToY;
 
+    enum class ALIGNMENT
+    {
+        GOOD,
+        BAD,
+        NEUTRAL
+    } alignment;
+
 private:
     SDL_Surface* imgCurrentFrame;
     map<ANIMATION, Animation> animations;
+    unsigned int tickCounter;
 };
 
 

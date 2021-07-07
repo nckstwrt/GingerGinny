@@ -59,10 +59,12 @@ int main(int argc, char* argv[])
     
     // Ginny is monster 0
     shared_ptr<Monster> pGinny = World.AddMonster(ginny, 50, 50, true);
+    pGinny->alignment = Monster::ALIGNMENT::GOOD;
     
     shared_ptr<Monster> pOgre = World.AddMonster(ogre, 50, 120, false);
 
     shared_ptr<Monster> pHagrid = World.AddMonster(hagrid, 105, 30, true);
+    pHagrid->alignment = Monster::ALIGNMENT::NEUTRAL;
     /*
     World.AddMonster(ogre, 180, 110, false);
     World.AddMonster(demon, 30, 150, true);
@@ -153,7 +155,7 @@ int main(int argc, char* argv[])
         if (Game.keys[SDLK_b])
         {
             //pOgre->MoveTo(pGinny->x+(pGinny->width/2), (pGinny->y+pGinny->height)-10);
-            points = World.MonsterMoveTo(pOgre, pGinny->x + (pGinny->width / 2), (pGinny->y + pGinny->height) - 10);
+            points = World.MonsterMoveTo(pOgre, pGinny->GetMidPoint(true).x, pGinny->GetMidPoint(true).y);
             Game.keys[SDLK_b] = false;
         }
         if (Game.keys[SDLK_c])
@@ -163,6 +165,23 @@ int main(int argc, char* argv[])
             pOgre = temp;
             World.pCameraFollow = pGinny;
             Game.keys[SDLK_c] = false;
+        }
+        if (Game.keys[SDLK_d])
+        {
+            int r = 50; // radius
+            int ox = pOgre->x, oy = pOgre->y; // origin
+
+            points.clear();
+            for (int x = -r; x < r; x++)
+            {
+                int height = (int)sqrt(r * r - x * x);
+
+                for (int y = -height; y < height; y++)
+                {
+                    points.push_back({ x + ox, y + oy });
+                }
+            }
+            Game.keys[SDLK_d] = false;
         }
 
         World.Update();

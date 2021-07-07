@@ -44,8 +44,8 @@ namespace AStar
         void setHeuristic(HeuristicFunction heuristic_);
         CoordinateList findPath(Point source_, Point target_, int maxIterations_ = 300);
         void addWall(Point coordinates_);
-        void addMonster(Point coordinates1, Point coordinates2);
-        void removeMonster(Point coordinates_);
+        void addMonster(Rect rect);
+        void removeMonster(Rect rect);
         void clearMonsters();
 
     private:
