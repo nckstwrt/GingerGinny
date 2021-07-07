@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
             World.pCameraFollow = pGinny;
             Game.keys[SDLK_c] = false;
         }
-        if (Game.keys[SDLK_d])
+        if (Game.keys[SDLK_e])
         {
             int r = 50; // radius
             int ox = pOgre->x, oy = pOgre->y; // origin
@@ -181,7 +181,7 @@ int main(int argc, char* argv[])
                     points.push_back({ x + ox, y + oy });
                 }
             }
-            Game.keys[SDLK_d] = false;
+            Game.keys[SDLK_e] = false;
         }
 
         World.Update();
