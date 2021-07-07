@@ -11,6 +11,7 @@ Monster::Monster() :
     attacking(false),
     pWorld(NULL),
     lastMoveToX(0), lastMoveToY(0),
+    chasingMonster(NULL),
     alignment(Monster::ALIGNMENT::BAD),
     tickCounter(0)
 {
@@ -112,30 +113,38 @@ void Monster::Update()
     // If we're a BAD monster look for GOOD players to move towards
     if ((tickCounter % 10) == 0 && alignment == Monster::ALIGNMENT::BAD && pWorld)
     {
-        Circle ourRadius(GetMidPoint().x, GetMidPoint().y, 100);
         auto us = *find_if(pWorld->monsters.begin(), pWorld->monsters.end(), [this](const shared_ptr<Monster>& x) { return x.get() == this; });
-        for (auto &monster : pWorld->monsters)
+        if (chasingMonster == NULL)
         {
-            if (monster.get() != this)
+            Circle ourRadius(GetMidPoint().x, GetMidPoint().y, 100);
+            for (auto& monster : pWorld->monsters)
             {
-                if (monster->alignment == Monster::ALIGNMENT::GOOD)
+                if (monster.get() != this)
                 {
-                    if (ourRadius.ContainsPoint(monster->GetMidPoint().x, monster->GetMidPoint().y))
+                    if (monster->alignment == Monster::ALIGNMENT::GOOD)
                     {
-                        // We've found Ginny nearby, now let's go chase her if we have line of sight
-                        bool lineBroken = false;
-                        Helper::CalcLine(GetMidPoint().x, GetMidPoint().y, monster->GetMidPoint().x, monster->GetMidPoint().y, [this, &lineBroken](int x, int y, int sx, int sy)
+                        if (ourRadius.ContainsPoint(monster->GetMidPoint().x, monster->GetMidPoint().y))
                         {
-                            if (pWorld->SafeGetTile(x / TILE_SIZE, y / TILE_SIZE, 0)->tileType == TILE_TYPE::WALL_ALWAYS_ON_TOP)
-                                lineBroken = true;
-                        });
-                        if (!lineBroken)
-                        {
-                            pWorld->MonsterMoveTo(us, monster->GetMidPoint().x, monster->GetMidPoint(true).y);
+                            // We've found Ginny nearby, now let's go chase her if we have line of sight
+                            bool lineBroken = false;
+                            Helper::CalcLine(GetMidPoint().x, GetMidPoint().y, monster->GetMidPoint().x, monster->GetMidPoint().y, [this, &lineBroken](int x, int y, int sx, int sy)
+                                {
+                                    if (pWorld->SafeGetTile(x / TILE_SIZE, y / TILE_SIZE, 0)->tileType == TILE_TYPE::WALL_ALWAYS_ON_TOP)
+                                        lineBroken = true;
+                                });
+                            if (!lineBroken)
+                            {
+                                pWorld->MonsterMoveTo(us, monster->GetMidPoint(true).x, monster->GetMidPoint(true).y);
+                                chasingMonster = monster;
+                            }
                         }
                     }
                 }
             }
+        }
+        else
+        { 
+            pWorld->MonsterMoveTo(us, chasingMonster->GetMidPoint(true).x, chasingMonster->GetMidPoint(true).y);
         }
     }
 

@@ -43,6 +43,7 @@ public:
     World* pWorld;
     int lastMoveToX;
     int lastMoveToY;
+    shared_ptr<Monster> chasingMonster;
 
     enum class ALIGNMENT
     {
