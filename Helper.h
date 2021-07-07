@@ -4,6 +4,7 @@
 #include <string>
 #include <stdexcept>
 #include <functional>
+#include <math.h>
 using namespace std;
 
 class Helper
