@@ -162,9 +162,7 @@ void SDLGame::DrawRect(int x, int y, int width, int height, SDLColor color, RECT
         rectangleColor(hw_surface, x, y, x + width, y + height, color.ReversedUInt());
         break;
     case RECTANGLE_TYPE::FILLED:
-        c = SDL_MapRGB(hw_surface->format, color.color.r, color.color.g, color.color.b);
-        draw_rect = { .x = (Sint16)x, .y = (Sint16)y, .w = (Uint16)width, .h = (Uint16)height };
-        SDL_FillRect(hw_surface, &draw_rect, c);
+        boxColor(hw_surface, x, y, x + width, y + height, color.ReversedUInt());
         break;
     case RECTANGLE_TYPE::BOX_ROUNDED:
         roundedRectangleColor(hw_surface, x, y, x + width, y + height, rad, color.ReversedUInt());
@@ -209,7 +207,6 @@ void SDLGame::OutputText(TTF_Font* font, const char* szText, SDLColor col, int x
 
 SDL_Surface* SDLGame::CreateTextSurface(TTF_Font* font, const char* szText, SDL_Color col)
 {
-    //TTF_SetFontOutline(font, 1);
     return TTF_RenderText_Blended(font, szText, col);
 }
 

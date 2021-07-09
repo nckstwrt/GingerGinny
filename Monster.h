@@ -34,6 +34,7 @@ public:
     int x;
     int y;
     int width;
+    int characterWidth;
     int height;
     bool facingRight;
     bool AI;

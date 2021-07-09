@@ -55,12 +55,12 @@ void World::LoadMap(const char* szMapFile)
         if (strstr(szImage, "_f0"))
         {
             string animImages = szImage;
-            int imageSpeed = 15;
+            int imageSpeed = 4;
             int imageCount = 3;
 
             if (strstr(szImage, "spikes"))
             {
-                imageSpeed = 10;
+                imageSpeed = 2;
                 imageCount = 4;
             }
 
@@ -73,7 +73,8 @@ void World::LoadMap(const char* szMapFile)
 
             if (strstr(szImage, "spikes"))
             {
-                tile.animation.SetAnimationDelay(0, 300);
+                tile.animation.SetAnimationDelay(0, 100);
+                tile.animation.SetAnimationDelay(3, 20);
                 for (int i = 3; i != 0; i--)
                 {
                     string imageFile = Helper::string_format(animImages, i);
@@ -115,30 +116,24 @@ void World::LoadMap(const char* szMapFile)
     pathFinder.setHeuristic(AStar::Heuristic::euclidean);
     pathFinder.setWorldSize({ tileMapWidth, tileMapHeight });
 
-    // Now force some walls to be on top
+    // Now force some walls to be on top and set up the pathfinder
     for (int y = 0; y < tileMapHeight; y++)
     {
         for (int x = 0; x < tileMapWidth; x++)
         {
             for (int i = 0; i < MAX_TILE_PER_SQUARE; i++)
             {
-                if (SafeGetTile(x, y, i)->tileType == TILE_TYPE::WALL &&
-                    (SafeGetTile(x + 1, y + 2, 0)->tileType == TILE_TYPE::EMPTY || SafeGetTile(x - 1, y + 2, 0)->tileType == TILE_TYPE::EMPTY) &&
-                    SafeGetTile(x, y - 1, 0)->tileType == TILE_TYPE::FLOOR)
-                {
+                if (SafeGetTile(x, y, i)->tileType == TILE_TYPE::WALL && SafeGetTile(x, y, 0)->tileType == TILE_TYPE::FLOOR)
                     SafeGetTile(x, y, i)->tileType = TILE_TYPE::WALL_ALWAYS_ON_TOP;
-                    //SafeGetTile(x, y - 1, 0)->tileType = TILE_TYPE::DEBUG;
-                }
+
+                // Set up pathfinder
                 if (i == 0)
                 {
-                    if (/*SafeGetTile(x, y, 0)->tileType != TILE_TYPE::WALL &&*/ SafeGetTile(x, y, 0)->tileType != TILE_TYPE::FLOOR)
+                    if (SafeGetTile(x, y, 0)->tileType != TILE_TYPE::FLOOR)
                     {
                         pathFinder.addWall({ x, y });
                     }
                 }
-                else
-                    if (SafeGetTile(x, y, i)->tileType == TILE_TYPE::WALL_ALWAYS_ON_TOP)
-                        pathFinder.addWall({ x, y });
             }
         }
     }
@@ -163,8 +158,8 @@ Tile* World::SafeGetTile(int x, int y, int i)
 shared_ptr<Monster> World::AddMonster(const Monster &monsterToCopy, int tileX, int tileY, bool facingRight)
 {
     shared_ptr<Monster> newMonster = make_shared<Monster>(monsterToCopy);
-    newMonster->x = tileX;
-    newMonster->y = tileY;
+    newMonster->x = ((tileX * TILE_SIZE) + (TILE_SIZE / 2)) - (newMonster->width / 2);
+    newMonster->y = ((tileY * TILE_SIZE) + (TILE_SIZE)) - (newMonster->height);  // Put their feet roughly centre square
     newMonster->facingRight = facingRight;
     newMonster->pWorld = this;
     //newMonster.AI = true;
@@ -176,6 +171,11 @@ shared_ptr<Monster> World::AddMonster(const Monster &monsterToCopy, int tileX, i
 
 void World::Update()
 {
+    // Update all Tiles
+    for (int y = 0; y < tileMapHeight; y++)
+        for (int x = 0; x < tileMapWidth; x++)
+            SafeGetTile(x, y, 0)->Update();
+
     // Update all Monsters
     for (auto &monster : monsters)
     {
@@ -234,11 +234,6 @@ void World::Draw()
                             int pixelX = TileXToDisplayPixelX(pTile->x);
                             int pixelY = TileYToDisplayPixelY(pTile->y);
 
-                            if (pTile->tileType == TILE_TYPE::DEBUG)
-                            {
-                                pGame->DrawRect(pixelX, pixelY, 16, 16, SDLColor(255, 0, 0));
-                            }
-                            else
                             if ((pTile->tileType == TILE_TYPE::FLOOR || (startTileY + y + 2 < tileMapHeight && tileMap[startTileY + y + 2][startTileX + x] != NULL)) && pTile->tileType != TILE_TYPE::WALL_ALWAYS_ON_TOP)
                                 pGame->BlitImage(pTile->GetCurrentImage(), pixelX, pixelY);
                         }
@@ -273,11 +268,6 @@ void World::Draw()
                             int pixelX = TileXToDisplayPixelX(pTile->x);
                             int pixelY = TileYToDisplayPixelY(pTile->y);
 
-                            if (pTile->tileType == TILE_TYPE::DEBUG)
-                            {
-                                pGame->DrawRect(pixelX, pixelY, 16, 16, SDLColor(255, 0, 0));
-                            }
-                            else
                             if (!(pTile->tileType == TILE_TYPE::FLOOR || (startTileY + y + 2 < tileMapHeight && tileMap[startTileY + y + 2][startTileX + x] != NULL)) || pTile->tileType == TILE_TYPE::WALL_ALWAYS_ON_TOP)
                                 pGame->BlitImage(pTile->GetCurrentImage(), pixelX, pixelY);
                         }
@@ -293,7 +283,7 @@ void World::Draw()
     for (auto& point : debugPoints)
         pGame->DrawPoint(PixelXToDisplayPixelX(point.x), PixelYToDisplayPixelY(point.y), SDLColor(255, 0, 0));
     for (auto& rect : debugRects)
-        pGame->DrawRect(PixelXToDisplayPixelX(rect.x), PixelYToDisplayPixelY(rect.y), rect.width, rect.height, SDLColor(255, 0, 0));
+        pGame->DrawRect(PixelXToDisplayPixelX(rect.x), PixelYToDisplayPixelY(rect.y), rect.width, rect.height, SDLColor(255, 0, 0, 60));
 }
 
 int World::TileXToDisplayPixelX(int tileX)
@@ -322,9 +312,10 @@ bool World::MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction, bool 
     int savedY = pMonster->y;
     pMonster->Move(direction);
 
-    int monsterX1 = pMonster->x - 4;
-    int monsterX2 = pMonster->x + (pMonster->width + 6);
-    int monsterY = pMonster->y + pMonster->height - 8;
+    auto monsterRect = pMonster->GetRect(true);
+    int monsterX1 = monsterRect.x + 1;
+    int monsterX2 = (monsterRect.x + monsterRect.width) - 1;
+    int monsterY = monsterRect.y;
     
     bool moveBack = false;
     int monsterXTile1 = monsterX1 / TILE_SIZE;
@@ -333,10 +324,9 @@ bool World::MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction, bool 
     if (monsterXTile1 >= 0 && monsterXTile2 >= 0 && monsterYTile >= 0 &&
         monsterXTile1 < tileMapWidth && monsterXTile2 < tileMapWidth && monsterYTile < tileMapHeight)
     {
-        // Check Tile (Y and X are supposed to be the wrong way round)
-        if (tileMap[monsterYTile][monsterXTile1] == NULL || (tileMap[monsterYTile][monsterXTile1] != NULL && tileMap[monsterYTile][monsterXTile1][0].tileType != TILE_TYPE::FLOOR))
+        if (SafeGetTile(monsterXTile1, monsterYTile, 0)->tileType != TILE_TYPE::FLOOR)
             moveBack = true;
-        if (tileMap[monsterYTile][monsterXTile2] == NULL || (tileMap[monsterYTile][monsterXTile2] != NULL && tileMap[monsterYTile][monsterXTile2][0].tileType != TILE_TYPE::FLOOR))
+        if (SafeGetTile(monsterXTile2, monsterYTile, 0)->tileType != TILE_TYPE::FLOOR)
             moveBack = true;
     }
     else
@@ -400,8 +390,11 @@ vector<Point> World::MonsterMoveTo(shared_ptr<Monster> pMonster, int x, int y)
     reverse(ret.begin(), ret.end());
     
     // Skipping the first one seems to help a lot here
-    for (unsigned int i = 1; i < ret.size(); i++)
-        pMonster->MoveTo(ret[i].x, ret[i].y, i != 1);
+    if (ret.size() > 1)
+    {
+        for (unsigned int i = 1; i < ret.size(); i++)
+            pMonster->MoveTo(ret[i].x, ret[i].y, i != 1);
+    }
 
     return ret;
 }

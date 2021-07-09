@@ -3,7 +3,7 @@
 
 Monster::Monster() :
     x(0), y(0),
-    width(0), height(0),
+    width(0), characterWidth(0), height(0),
     facingRight(true),
     AI(false),
     imgCurrentFrame(NULL),
@@ -36,6 +36,7 @@ Animation* Monster::AddAnimationImages(ANIMATION animationType, int imageCycleDe
         if (width == 0 || height == 0)
         {
             width = animation.CurrentImage()->w;
+            characterWidth = width;
             height = animation.CurrentImage()->h;
         }
     }
@@ -193,15 +194,16 @@ bool Monster::CheckOverlap(shared_ptr<Monster> p2)
 
 Rect Monster::GetRect(bool justFeet)
 {
-    Rect rect(x, y, width, height);
+    int charWidthDiff = (width - characterWidth)/2;
+    Rect rect(x + charWidthDiff, y, characterWidth, height);
 
     // Shrink the monster to just skinny "feet"
     if (justFeet)
     {
-        rect.y = (rect.y + rect.height) - 10;
-        rect.height = 10;
-        rect.x += 3;
-        rect.width -= 6;
+        rect.y = (rect.y + rect.height) - 5;
+        rect.height = 5;
+        rect.x;
+        rect.width;
     }
 
     return rect;
@@ -209,6 +211,7 @@ Rect Monster::GetRect(bool justFeet)
 
 Point Monster::GetMidPoint(bool fromFeet)
 {
-    return Point(x + (width / 2), fromFeet ? ((y + height) - 10) : (y + (height / 2)));
+    int charWidthDiff = (width - characterWidth)/2;
+    return Point(x + charWidthDiff + (characterWidth / 2), fromFeet ? ((y + height) - 5) : (y + (height / 2)));
 }
 

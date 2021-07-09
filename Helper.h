@@ -78,6 +78,11 @@ public:
         return (x == rhs.x && y == rhs.y);
     }
 
+    bool operator!= (const Point& rhs)
+    {
+        return (x != rhs.x || y != rhs.y);
+    }
+
     Point operator+(const Point& rhs)
     {
         return { x + rhs.x, y + rhs.y };

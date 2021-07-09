@@ -104,8 +104,8 @@ AStar::CoordinateList AStar::Generator::findPath(Point source_, Point target_, i
 {
     Node *current = nullptr;
     NodeSet openSet, closedSet;
-    openSet.reserve(100);
-    closedSet.reserve(100);
+    openSet.reserve(500);
+    closedSet.reserve(500);
     openSet.push_back(new Node(source_));
 
     int iterations = 0;
@@ -124,9 +124,8 @@ AStar::CoordinateList AStar::Generator::findPath(Point source_, Point target_, i
             }
         }
 
-        if (current->coordinates == target_) {
+        if (current->coordinates == target_)
             break;
-        }
 
         closedSet.push_back(current);
         openSet.erase(current_it);
@@ -154,6 +153,9 @@ AStar::CoordinateList AStar::Generator::findPath(Point source_, Point target_, i
             }
         }
     }
+
+    if (current && current->coordinates != target_)
+        current = nullptr;
 
     CoordinateList path;
     while (current != nullptr) {
