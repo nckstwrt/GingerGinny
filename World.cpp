@@ -155,14 +155,15 @@ Tile* World::SafeGetTile(int x, int y, int i)
     return ret;
 }
 
-shared_ptr<Monster> World::AddMonster(const Monster &monsterToCopy, int tileX, int tileY, bool facingRight)
+shared_ptr<Monster> World::AddMonster(const Monster &monsterToCopy, int tileX, int tileY, bool facingRight, ALIGNMENT alignment)
 {
     shared_ptr<Monster> newMonster = make_shared<Monster>(monsterToCopy);
     newMonster->x = ((tileX * TILE_SIZE) + (TILE_SIZE / 2)) - (newMonster->width / 2);
     newMonster->y = ((tileY * TILE_SIZE) + (TILE_SIZE)) - (newMonster->height);  // Put their feet roughly centre square
     newMonster->facingRight = facingRight;
+    newMonster->alignment = alignment;
     newMonster->pWorld = this;
-    //newMonster.AI = true;
+
     monsters.push_back(newMonster);
     if (monsters.size() == 1)
         pCameraFollow = monsters[0];

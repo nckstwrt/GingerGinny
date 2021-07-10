@@ -31,13 +31,15 @@ public:
     Rect GetRect(bool justFeet = false);
     Point GetMidPoint(bool fromFeet = false);
 
+    static void ChaseAI(Monster* pMonster);
+
     int x;
     int y;
     int width;
     int characterWidth;
     int height;
     bool facingRight;
-    bool AI;
+    function<void(Monster*)> AI;
     bool walking;
     bool attacking;
     queue<DIRECTION> directions;
@@ -45,13 +47,7 @@ public:
     int lastMoveToX;
     int lastMoveToY;
     shared_ptr<Monster> chasingMonster;
-
-    enum class ALIGNMENT
-    {
-        GOOD,
-        BAD,
-        NEUTRAL
-    } alignment;
+    ALIGNMENT alignment;
 
 private:
     SDL_Surface* imgCurrentFrame;

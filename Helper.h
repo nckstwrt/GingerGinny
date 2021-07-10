@@ -62,6 +62,13 @@ public:
     }
 };
 
+enum class ALIGNMENT
+{
+    GOOD,
+    BAD,
+    NEUTRAL
+};
+
 class Point
 {
 public:

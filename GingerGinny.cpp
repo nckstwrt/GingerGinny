@@ -5,7 +5,7 @@
 #include "World.h"
 #include <SDL/SDL_mixer.h>
 
-//#define PLAY_MUSIC
+#define PLAY_MUSIC
 
 int main(int argc, char* argv[])
 {
@@ -56,16 +56,13 @@ int main(int argc, char* argv[])
     hagrid.AddAnimationImages(ANIMATION::Idle, 1, 1, hagridImg);
     
     // Ginny is monster 0
-    shared_ptr<Monster> pGinny = World.AddMonster(ginny, 6, 8, true);
-    pGinny->alignment = Monster::ALIGNMENT::GOOD;
+    shared_ptr<Monster> pGinny = World.AddMonster(ginny, 6, 8, true, ALIGNMENT::GOOD);
     pGinny->characterWidth = 22;
     
-    shared_ptr<Monster> pOgre = World.AddMonster(ogre, 10, 18, false);
-    pOgre->alignment = Monster::ALIGNMENT::NEUTRAL;
+    shared_ptr<Monster> pOgre = World.AddMonster(ogre, 10, 18, false, ALIGNMENT::BAD);
     pOgre->characterWidth = 16;
 
-    shared_ptr<Monster> pHagrid = World.AddMonster(hagrid, 12, 6, true);
-    pHagrid->alignment = Monster::ALIGNMENT::NEUTRAL;
+    shared_ptr<Monster> pHagrid = World.AddMonster(hagrid, 12, 6, true, ALIGNMENT::NEUTRAL);
     /*
     World.AddMonster(ogre, 180, 110, false);
     World.AddMonster(demon, 30, 150, true);
