@@ -5,6 +5,7 @@
 #include <SDL/SDL_rotozoom.h>
 #include <vector>
 #include <string>
+#include <algorithm>
 using namespace std;
 
 enum class DIRECTION
