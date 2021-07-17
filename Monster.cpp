@@ -214,9 +214,8 @@ shared_ptr<Monster> Monster::GetUs()
 void Monster::ChaseAI(Monster *pMonster)
 {
     // If we're a BAD monster look for GOOD players to move towards
-    if ((pMonster->tickCounter % 10) == 0 && pMonster->alignment == ALIGNMENT::BAD && pMonster->pWorld)
+    if ((pMonster->tickCounter % 20) == 0 && pMonster->alignment == ALIGNMENT::BAD && pMonster->pWorld)
     {
-        auto us = *find_if(pMonster->pWorld->monsters.begin(), pMonster->pWorld->monsters.end(), [pMonster](const shared_ptr<Monster>& x) { return x.get() == pMonster; });
         if (pMonster->chasingMonster == NULL)
         {
             Circle ourRadius(pMonster->GetMidPoint().x, pMonster->GetMidPoint().y, 100);
@@ -237,7 +236,7 @@ void Monster::ChaseAI(Monster *pMonster)
                                 });
                             if (!lineBroken)
                             {
-                                pMonster->pWorld->MonsterMoveTo(us, monster->GetMidPoint(true).x, monster->GetMidPoint(true).y);
+                                pMonster->pWorld->MonsterMoveTo(pMonster->GetUs(), monster->GetMidPoint(true).x, monster->GetMidPoint(true).y);
                                 pMonster->chasingMonster = monster;
                             }
                         }
@@ -247,7 +246,7 @@ void Monster::ChaseAI(Monster *pMonster)
         }
         else
         {
-            pMonster->pWorld->MonsterMoveTo(us, pMonster->chasingMonster->GetMidPoint(true).x, pMonster->chasingMonster->GetMidPoint(true).y);
+            pMonster->pWorld->MonsterMoveTo(pMonster->GetUs(), pMonster->chasingMonster->GetMidPoint(true).x, pMonster->chasingMonster->GetMidPoint(true).y);
         }
     }
 }

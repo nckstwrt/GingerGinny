@@ -33,7 +33,7 @@ public:
     void FlipScreen();
     SDL_Event PollEvents();
     SDL_Surface* LoadImage(const char* szImageFile);
-    SDL_Surface* GetLoadedImage(const char* szImageShortName, const char* szLoadFromDirectory = NULL);
+    SDL_Surface* GetLoadedImage(const char* szImageShortName, const char* szLoadFromDirectory = "images");
     void FreeImage(const char* szImageFile);
     void BlitImage(SDL_Surface* img, int x, int y);
     void BlitImage(SDL_Surface* img, int srcX, int srcY, int w, int h, int x, int y);

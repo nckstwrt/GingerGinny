@@ -72,7 +72,7 @@ void World::LoadMap(const char* szMapFile)
                 for (int i = 0; i < imageCount; i++)
                 {
                     string imageFile = Helper::string_format(animImages, i);
-                    tile.animation.AddImage(imageFile, pGame->GetLoadedImage(imageFile.c_str(), "images/DungeonTilesetII_v1.4"), NULL, imageSpeed);
+                    tile.animation.AddImage(imageFile, pGame->GetLoadedImage(imageFile.c_str()), NULL, imageSpeed);
                 }
 
                 if (strstr(szImage, "spikes"))
@@ -82,12 +82,12 @@ void World::LoadMap(const char* szMapFile)
                     for (int i = 3; i != 0; i--)
                     {
                         string imageFile = Helper::string_format(animImages, i);
-                        tile.animation.AddImage(imageFile, pGame->GetLoadedImage(imageFile.c_str(), "images/DungeonTilesetII_v1.4"), NULL, imageSpeed);
+                        tile.animation.AddImage(imageFile, pGame->GetLoadedImage(imageFile.c_str()), NULL, imageSpeed);
                     }
                 }
             }
             else
-                tile.animation.AddImage(szImage, pGame->GetLoadedImage(szImage, "images/DungeonTilesetII_v1.4"), NULL, 100);
+                tile.animation.AddImage(szImage, pGame->GetLoadedImage(szImage), NULL, 100);
             tiles.push_back(tile);
         }
         if (spriteOrTile == 'S')
@@ -95,12 +95,12 @@ void World::LoadMap(const char* szMapFile)
             auto iter = find_if(monsterTemplates.begin(), monsterTemplates.end(), [szImage](const shared_ptr<Monster>& monster) { return monster->HasImage(szImage); });
             if (iter != monsterTemplates.end())
             {
-                AddMonster(*(*iter).get(), x, y, rightOrleft == 'R', ALIGNMENT::BAD);
+                AddMonster(*(*iter).get(), x, y, rightOrleft == 'R', (*iter)->alignment);
             }
             else
             {
                 Monster spriteMonster;
-                spriteMonster.AddAnimationImages(ANIMATION::Idle, 1000, 1, szImage, pGame->GetLoadedImage(szImage, "images/DungeonTilesetII_v1.4"));
+                spriteMonster.AddAnimationImages(ANIMATION::Idle, 1000, 1, szImage, pGame->GetLoadedImage(szImage));
                 AddMonster(spriteMonster, x, y, rightOrleft == 'R', ALIGNMENT::NEUTRAL);
             }
         }
@@ -155,6 +155,13 @@ void World::LoadMap(const char* szMapFile)
             }
         }
     }
+
+    // Now set Ginny up
+    auto ginny = find_if(monsters.begin(), monsters.end(), [szImage](const shared_ptr<Monster>& monster) { return monster->HasImage("idle_000_vsmall.png"); });
+    if (ginny != monsters.end())
+    {
+        pCameraFollow = *ginny;
+    }
 }
 
 Tile* World::SafeGetTile(int x, int y, int i)
@@ -173,10 +180,11 @@ Tile* World::SafeGetTile(int x, int y, int i)
     return ret;
 }
 
-void World::AddMonsterTemplate(const Monster& monsterToCopy)
+void World::AddMonsterTemplate(const Monster& monsterToCopy, ALIGNMENT alignment)
 {
     shared_ptr<Monster> newMonster = make_shared<Monster>(monsterToCopy);
     newMonster->pWorld = this;
+    newMonster->alignment = alignment;
     monsterTemplates.push_back(newMonster);
 }
 

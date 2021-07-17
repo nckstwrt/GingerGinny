@@ -27,7 +27,7 @@ public:
     void FreeTileMap();
     void LoadMap(const char* szMapFile);
     Tile* SafeGetTile(int x, int y, int i);
-    void AddMonsterTemplate(const Monster& monsterToCopy);
+    void AddMonsterTemplate(const Monster& monsterToCopy, ALIGNMENT alignment = ALIGNMENT::BAD);
     shared_ptr<Monster> AddMonster(const Monster &monsterToCopy, int x, int y, bool facingRight, ALIGNMENT alignment);
     void Update();
     void Draw();

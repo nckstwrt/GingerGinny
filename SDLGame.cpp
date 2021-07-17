@@ -154,8 +154,6 @@ SDL_Surface* SDLGame::CreateHorizontallyFlippedImage(SDL_Surface* img)
 
 void SDLGame::DrawRect(int x, int y, int width, int height, SDLColor color, RECTANGLE_TYPE rectangleType, int rad)
 {
-    Uint32 c;
-    SDL_Rect draw_rect;
     switch (rectangleType)
     {
     case RECTANGLE_TYPE::BOX:

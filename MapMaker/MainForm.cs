@@ -27,6 +27,7 @@ namespace MapMaker
         int outputHeight = 128;
         int tileSize = 16;
         bool placingTiles = false;
+        public static string rootFolder = @"..\..\..\GingerGinny\Images\\";
 
         public MainForm()
         {
@@ -35,13 +36,14 @@ namespace MapMaker
             BackColor = Color.FromArgb(34, 34, 34);
 
             List<string> TileFiles = new List<string>();
-            TileFiles.AddRange(Directory.GetFiles(@"C:\Development\GingerGinny\Images\DungeonTilesetII_v1.4", "floor*.png"));
-            TileFiles.AddRange(Directory.GetFiles(@"C:\Development\GingerGinny\Images\DungeonTilesetII_v1.4", "wall*.png"));
+            TileFiles.AddRange(Directory.GetFiles(Path.Combine(rootFolder, "DungeonTilesetII_v1.4"), "floor*.png"));
+            TileFiles.AddRange(Directory.GetFiles(Path.Combine(rootFolder, "DungeonTilesetII_v1.4"), "wall*.png"));
             TileFiles.Sort();
 
             List<string> SpriteFiles = new List<string>();
-            SpriteFiles.AddRange(Directory.GetFiles(@"C:\Development\GingerGinny\Images\DungeonTilesetII_v1.4", "*.png"));
+            SpriteFiles.AddRange(Directory.GetFiles(Path.Combine(rootFolder, "DungeonTilesetII_v1.4"), "*.png"));
             SpriteFiles.RemoveAll(x => TileFiles.Contains(x));
+            SpriteFiles.Add(Path.Combine(rootFolder, "idle_000_vsmall.png"));
 
             foreach (var tileFile in TileFiles)
                 tiles.Add(new Tile(tileFile));
@@ -281,7 +283,7 @@ namespace MapMaker
                 { 
                     foreach (var tilePiece in tilePieces)
                     {
-                        sw.WriteLine(string.Format("{0} {1} {2} {3} {4}", tilePiece.x, tilePiece.y, tilePiece.tile.shortName, tilePiece.tile.isSprite ? "S" : "T", tilePiece.facingRight ? "R" : "L"));
+                        sw.WriteLine(string.Format("{0} {1} {2} {3} {4}", tilePiece.x, tilePiece.y, tilePiece.tile.shortName.Replace("\\", "/"), tilePiece.tile.isSprite ? "S" : "T", tilePiece.facingRight ? "R" : "L"));
                     }
                 }
             }
@@ -357,12 +359,14 @@ namespace MapMaker
             image = new Bitmap(fileName);
             flippedImage = new Bitmap(image);
             flippedImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
-            shortName = Path.GetFileName(fileName);
+            //shortName = Path.GetFileName(fileName);
+            shortName = fileName.Replace(MainForm.rootFolder, "").Replace("\\", "/");
             this.fileName = fileName;
             this.isSprite = isSprite;
         }
         public string fileName;
         public string shortName;
+        //public string shortName2;
         public Bitmap image;
         public Bitmap flippedImage;
         public bool isSprite;
