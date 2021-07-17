@@ -13,6 +13,7 @@ Monster::Monster() :
     lastMoveToX(0), lastMoveToY(0),
     chasingMonster(NULL),
     alignment(ALIGNMENT::BAD),
+    blocking(true),
     tickCounter(0)
 {
 }
@@ -22,17 +23,17 @@ Monster::Monster(const Monster& monster)
     *this = monster;
 }
 
-Animation* Monster::AddAnimationImages(ANIMATION animationType, int imageCycleDelay, int imageCount, ...)
+Animation* Monster::AddAnimationImages(ANIMATION animationType, int imageCycleDelay, int imageCount, string firstImageName, ...)
 {
     va_list vl;
-    va_start(vl, imageCount);
+    va_start(vl, firstImageName);
 
     Animation animation;
 
     for (int i = 0; i < imageCount; i++)
     {
         SDL_Surface* img = va_arg(vl, SDL_Surface*);
-        animation.AddImage(img, SDLGame::CreateHorizontallyFlippedImage(img), imageCycleDelay);
+        animation.AddImage(firstImageName, img, SDLGame::CreateHorizontallyFlippedImage(img), imageCycleDelay);
         if (width == 0 || height == 0)
         {
             width = animation.CurrentImage()->w;
@@ -111,6 +112,15 @@ void Monster::Attack()
 
 void Monster::Update()
 {
+    // If has directions to go to, move the monster
+    if (directions.size() > 0)
+    {
+        pWorld->MonsterMove(GetUs(), directions.front());
+        directions.pop();
+        if (directions.size() == 0)
+            walking = false;
+    }
+
     if (AI)
         AI(this);
 
@@ -180,6 +190,27 @@ Point Monster::GetMidPoint(bool fromFeet)
     return Point(x + charWidthDiff + (characterWidth / 2), fromFeet ? ((y + height) - 5) : (y + (height / 2)));
 }
 
+bool Monster::HasImage(const char* szImage)
+{
+    bool ret = false;
+    for (auto& anim : animations)
+    {
+        if (anim.second.HasImage(szImage))
+        {
+            ret = true;
+            break;
+        }
+    }
+    return ret;
+}
+
+shared_ptr<Monster> Monster::GetUs()
+{
+    if (us == nullptr)
+        us = *find_if(pWorld->monsters.begin(), pWorld->monsters.end(), [this](const shared_ptr<Monster>& x) { return x.get() == this; });
+    return us;
+}
+
 void Monster::ChaseAI(Monster *pMonster)
 {
     // If we're a BAD monster look for GOOD players to move towards
@@ -220,3 +251,4 @@ void Monster::ChaseAI(Monster *pMonster)
         }
     }
 }
+

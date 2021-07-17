@@ -7,11 +7,12 @@ Animation::Animation() :
 {
 }
 
-void Animation::AddImage(SDL_Surface* img, SDL_Surface* leftImage, int imageDelay)
+void Animation::AddImage(string imageName, SDL_Surface* img, SDL_Surface* leftImage, int imageDelay)
 {
     if (img == NULL)
         printf("Animation::AddImage - img is NULL!!!!\n");
 
+    imageNames.push_back(imageName);
     imagesRight.push_back(img);
     if (leftImage != NULL)
         imagesLeft.push_back(leftImage);
@@ -50,4 +51,9 @@ SDL_Surface* Animation::CurrentImage(bool facingRight)
 void Animation::SetAnimationDelay(int imageIndex, int delay)
 {
     animationDelays[imageIndex] = delay;
+}
+
+bool Animation::HasImage(string imageName)
+{
+    return find(imageNames.begin(), imageNames.end(), imageName) != imageNames.end();
 }

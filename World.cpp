@@ -36,56 +36,74 @@ void World::FreeTileMap()
 void World::LoadMap(const char* szMapFile)
 {
     vector<Tile> tiles;
-    char szImage[100] = { 0 };
     int x, y;
+    char szImage[100] = { 0 };
+    char spriteOrTile, rightOrleft;
     tileMapWidth = tileMapHeight = 0;
     FILE* f = fopen(szMapFile, "rt");
     while (true)
     {
-        if (fscanf(f, "%d %d %s", &x, &y, szImage) != 3)
+        if (fscanf(f, "%d %d %s %c %c", &x, &y, szImage, &spriteOrTile, &rightOrleft) != 5)
             break;
         if (x > tileMapWidth)
             tileMapWidth = x;
         if (y > tileMapHeight)
             tileMapHeight = y;
-        Tile tile(x, y);
-        tile.tileType = (strstr(szImage, "wall") == NULL) ? TILE_TYPE::FLOOR : TILE_TYPE::WALL;
 
-        // If it's an animation load all 3 frames
-        if (strstr(szImage, "_f0"))
+        if (spriteOrTile == 'T')
         {
-            string animImages = szImage;
-            int imageSpeed = 4;
-            int imageCount = 3;
+            Tile tile(x, y);
+            tile.tileType = (strstr(szImage, "wall") == NULL) ? TILE_TYPE::FLOOR : TILE_TYPE::WALL;
 
-            if (strstr(szImage, "spikes"))
+            // If it's an animation load all 3 frames
+            if (strstr(szImage, "_f0"))
             {
-                imageSpeed = 2;
-                imageCount = 4;
-            }
+                string animImages = szImage;
+                int imageSpeed = 4;
+                int imageCount = 3;
 
-            Helper::string_replace(animImages, "_f0", "_f%d");
-            for (int i = 0; i < imageCount; i++)
-            {
-                string imageFile = Helper::string_format(animImages, i);
-                tile.animation.AddImage(pGame->GetLoadedImage(imageFile.c_str(), "images/DungeonTilesetII_v1.4"), NULL, imageSpeed);
-            }
+                if (strstr(szImage, "spikes"))
+                {
+                    imageSpeed = 2;
+                    imageCount = 4;
+                }
 
-            if (strstr(szImage, "spikes"))
-            {
-                tile.animation.SetAnimationDelay(0, 100);
-                tile.animation.SetAnimationDelay(3, 20);
-                for (int i = 3; i != 0; i--)
+                Helper::string_replace(animImages, "_f0", "_f%d");
+                for (int i = 0; i < imageCount; i++)
                 {
                     string imageFile = Helper::string_format(animImages, i);
-                    tile.animation.AddImage(pGame->GetLoadedImage(imageFile.c_str(), "images/DungeonTilesetII_v1.4"), NULL, imageSpeed);
+                    tile.animation.AddImage(imageFile, pGame->GetLoadedImage(imageFile.c_str(), "images/DungeonTilesetII_v1.4"), NULL, imageSpeed);
+                }
+
+                if (strstr(szImage, "spikes"))
+                {
+                    tile.animation.SetAnimationDelay(0, 100);
+                    tile.animation.SetAnimationDelay(3, 20);
+                    for (int i = 3; i != 0; i--)
+                    {
+                        string imageFile = Helper::string_format(animImages, i);
+                        tile.animation.AddImage(imageFile, pGame->GetLoadedImage(imageFile.c_str(), "images/DungeonTilesetII_v1.4"), NULL, imageSpeed);
+                    }
                 }
             }
+            else
+                tile.animation.AddImage(szImage, pGame->GetLoadedImage(szImage, "images/DungeonTilesetII_v1.4"), NULL, 100);
+            tiles.push_back(tile);
         }
-        else
-            tile.animation.AddImage(pGame->GetLoadedImage(szImage, "images/DungeonTilesetII_v1.4"), NULL, 100);
-
-        tiles.push_back(tile);
+        if (spriteOrTile == 'S')
+        {
+            auto iter = find_if(monsterTemplates.begin(), monsterTemplates.end(), [szImage](const shared_ptr<Monster>& monster) { return monster->HasImage(szImage); });
+            if (iter != monsterTemplates.end())
+            {
+                AddMonster(*(*iter).get(), x, y, rightOrleft == 'R', ALIGNMENT::BAD);
+            }
+            else
+            {
+                Monster spriteMonster;
+                spriteMonster.AddAnimationImages(ANIMATION::Idle, 1000, 1, szImage, pGame->GetLoadedImage(szImage, "images/DungeonTilesetII_v1.4"));
+                AddMonster(spriteMonster, x, y, rightOrleft == 'R', ALIGNMENT::NEUTRAL);
+            }
+        }
     }
     fclose(f);
 
@@ -155,6 +173,13 @@ Tile* World::SafeGetTile(int x, int y, int i)
     return ret;
 }
 
+void World::AddMonsterTemplate(const Monster& monsterToCopy)
+{
+    shared_ptr<Monster> newMonster = make_shared<Monster>(monsterToCopy);
+    newMonster->pWorld = this;
+    monsterTemplates.push_back(newMonster);
+}
+
 shared_ptr<Monster> World::AddMonster(const Monster &monsterToCopy, int tileX, int tileY, bool facingRight, ALIGNMENT alignment)
 {
     shared_ptr<Monster> newMonster = make_shared<Monster>(monsterToCopy);
@@ -180,17 +205,6 @@ void World::Update()
     // Update all Monsters
     for (auto &monster : monsters)
     {
-        // If has directions to go to, move the monster
-        if (monster->directions.size() > 0)
-        {
-            if (MonsterMove(monster, monster->directions.front()))
-            {
-                if (monster->directions.size() == 1)
-                    monster->walking = false;
-                monster->directions.pop();
-            }
-        }
-
         monster->Update();
     }
 
@@ -340,7 +354,7 @@ bool World::MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction, bool 
         {
             if (pMonster != monster)
             {
-                if (pMonster->CheckOverlap(monster))
+                if (monster->blocking && pMonster->CheckOverlap(monster))
                 {
                     moveBack = true;
                     break;
@@ -368,14 +382,17 @@ vector<Point> World::MonsterMoveTo(shared_ptr<Monster> pMonster, int x, int y)
     // Add all other monsters in
     for (auto& monster : monsters)
     {
-        Rect monsterFeet = monster->GetRect(true);
-        if (pMonster != monster)
+        if (monster->blocking)
         {
-            Rect monsterRect = monster->GetRect(true);
-            if (!monsterRect.ContainsPoint(x, y))
+            Rect monsterFeet = monster->GetRect(true);
+            if (pMonster != monster)
             {
-                monsterRect.DivideBy(TILE_SIZE);
-                pathFinder.addMonster(monsterRect);
+                Rect monsterRect = monster->GetRect(true);
+                if (!monsterRect.ContainsPoint(x, y))
+                {
+                    monsterRect.DivideBy(TILE_SIZE);
+                    pathFinder.addMonster(monsterRect);
+                }
             }
         }
     }

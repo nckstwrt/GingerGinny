@@ -20,7 +20,7 @@ public:
     Monster();
     Monster(const Monster &monster);
 
-    Animation* AddAnimationImages(ANIMATION animation, int imageCycleDelay, int imageCount, ...);
+    Animation* AddAnimationImages(ANIMATION animation, int imageCycleDelay, int imageCount, string firstImageName, ...);
 
     void Move(DIRECTION direction);
     void MoveTo(int moveToX, int moveToY, bool carryOnFromLastDirection = false);
@@ -30,6 +30,7 @@ public:
     bool CheckOverlap(shared_ptr<Monster> p2);
     Rect GetRect(bool justFeet = false);
     Point GetMidPoint(bool fromFeet = false);
+    bool HasImage(const char* szImage);
 
     static void ChaseAI(Monster* pMonster);
 
@@ -48,11 +49,14 @@ public:
     int lastMoveToY;
     shared_ptr<Monster> chasingMonster;
     ALIGNMENT alignment;
+    bool blocking;
 
 private:
+    shared_ptr<Monster> GetUs();
     SDL_Surface* imgCurrentFrame;
     map<ANIMATION, Animation> animations;
     unsigned int tickCounter;
+    shared_ptr<Monster> us;
 };
 
 

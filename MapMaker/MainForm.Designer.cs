@@ -37,6 +37,7 @@ namespace MapMaker
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hScrollBarView = new System.Windows.Forms.HScrollBar();
             this.vScrollBarView = new System.Windows.Forms.VScrollBar();
+            this.buttonMode = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -105,12 +106,23 @@ namespace MapMaker
             this.vScrollBarView.TabIndex = 3;
             this.vScrollBarView.ValueChanged += new System.EventHandler(this.vScrollBarView_ValueChanged);
             // 
+            // buttonMode
+            // 
+            this.buttonMode.Location = new System.Drawing.Point(1249, 522);
+            this.buttonMode.Name = "buttonMode";
+            this.buttonMode.Size = new System.Drawing.Size(75, 23);
+            this.buttonMode.TabIndex = 4;
+            this.buttonMode.Text = "Mode";
+            this.buttonMode.UseVisualStyleBackColor = true;
+            this.buttonMode.Click += new System.EventHandler(this.buttonMode_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(1345, 807);
+            this.Controls.Add(this.buttonMode);
             this.Controls.Add(this.vScrollBarView);
             this.Controls.Add(this.hScrollBarView);
             this.Controls.Add(this.hScrollBar);
@@ -142,6 +154,7 @@ namespace MapMaker
         private System.Windows.Forms.HScrollBar hScrollBarView;
         private System.Windows.Forms.VScrollBar vScrollBarView;
         private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
+        private System.Windows.Forms.Button buttonMode;
     }
 }
 

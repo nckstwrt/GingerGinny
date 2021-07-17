@@ -13,10 +13,13 @@ namespace MapMaker
 {
     public partial class MainForm : Form
     {
+        bool tileMode = true;
         List<Tile> tiles = new List<Tile>();
+        List<Tile> tilesSprites = new List<Tile>();
         List<TilePiece> tilePieces = new List<TilePiece>();
         FontFamily arialFont;
         Font tileTextFont;
+        Rectangle screenRect;
         int selectedTile = 0;
         int mouseX = 0;
         int mouseY = 0;
@@ -36,10 +39,15 @@ namespace MapMaker
             TileFiles.AddRange(Directory.GetFiles(@"C:\Development\GingerGinny\Images\DungeonTilesetII_v1.4", "wall*.png"));
             TileFiles.Sort();
 
+            List<string> SpriteFiles = new List<string>();
+            SpriteFiles.AddRange(Directory.GetFiles(@"C:\Development\GingerGinny\Images\DungeonTilesetII_v1.4", "*.png"));
+            SpriteFiles.RemoveAll(x => TileFiles.Contains(x));
+
             foreach (var tileFile in TileFiles)
-            {
                 tiles.Add(new Tile(tileFile));
-            }
+
+            foreach (var tileFile in SpriteFiles)
+                tilesSprites.Add(new Tile(tileFile, true));
 
             hScrollBar.Maximum = tiles.Count;
 
@@ -49,19 +57,41 @@ namespace MapMaker
             tileTextFont = new Font(arialFont, 14, FontStyle.Regular, GraphicsUnit.Pixel);
 
             MouseWheel += MainForm_MouseWheel;
+
+            screenRect = new Rectangle(0, menuStrip1.Location.Y + menuStrip1.Height, vScrollBarView.Location.X, hScrollBarView.Location.Y - (menuStrip1.Location.Y + menuStrip1.Height));
         }
 
         private void MainForm_MouseWheel(object sender, MouseEventArgs e)
         {
+            // Over actual tile
+            int mouseOverTileX = (mouseX / tileSize) + hScrollBarView.Value;
+            int mouseOverTileY = (mouseY / tileSize) + vScrollBarView.Value;
+
             if (e.Delta > 0)
             {
                 if (tileSize <= 128)
+                {
                     tileSize *= 2;
+
+                    int maxTilesX = screenRect.Width / tileSize;
+                    int maxTilesY = screenRect.Height / tileSize;
+
+                    hScrollBarView.Value = Math.Max(mouseOverTileX - (maxTilesX / 2), 0);
+                    vScrollBarView.Value = Math.Max(mouseOverTileY - (maxTilesY / 2), 0);
+                }
             }
-            else
+            if (e.Delta < 0)
             {
                 if (tileSize > 16)
+                {
                     tileSize /= 2;
+
+                    int maxTilesX = screenRect.Width / tileSize;
+                    int maxTilesY = screenRect.Height / tileSize;
+
+                    hScrollBarView.Value = Math.Max(mouseOverTileX - (maxTilesX / 2), 0);
+                    vScrollBarView.Value = Math.Max(mouseOverTileY - (maxTilesY / 2), 0);
+                }
             }
             Invalidate();
         }
@@ -86,16 +116,19 @@ namespace MapMaker
             g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.AssumeLinear;
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
 
+            var selectedTiles = GetSelectedTiles();
+
+            //g.DrawRectangle(Pens.Red, screenRect);
 
             // Draw tile selection at bottom
             for (int i = hScrollBar.Value; i < hScrollBar.Value + 10; i++)
             {
-                if (i < tiles.Count)
+                if (i < selectedTiles.Count)
                 {
                     int x = ((5 + outputWidth) * (i - hScrollBar.Value));
-                    g.DrawImage(tiles[i].image, x, hScrollBar.Location.Y + 35, outputWidth, outputHeight);
+                    g.DrawImage(selectedTiles[i].image, x, hScrollBar.Location.Y + 35, outputWidth, outputHeight);
                     var rect = new Rectangle(x, hScrollBar.Location.Y + 35 + 5 + outputHeight, outputWidth, 60);
-                    g.DrawString(string.Format("{0}. {1}", i, tiles[i].shortName), tileTextFont, Brushes.White, rect);
+                    g.DrawString(string.Format("{0}. {1}", i, selectedTiles[i].shortName), tileTextFont, Brushes.White, rect);
                 }
             }
 
@@ -103,7 +136,9 @@ namespace MapMaker
             foreach (var tile in tilePieces)
             {
                 if (((tile.y - vScrollBarView.Value) * tileSize) + tileSize < hScrollBar.Location.Y)
-                    g.DrawImage(tile.tile.image, (tile.x - hScrollBarView.Value) * tileSize, (tile.y - vScrollBarView.Value) * tileSize, tileSize, tileSize);
+                {
+                    g.DrawImage(tile.facingRight ? tile.tile.image : tile.tile.flippedImage, (tile.x - hScrollBarView.Value) * tileSize, (tile.y - vScrollBarView.Value) * tileSize, tileSize, tileSize);
+                }
             }
 
             // Draw the tile on the mouse pointer and list the current mouse location
@@ -115,9 +150,12 @@ namespace MapMaker
                     int tileY = mouseY;
                     tileX = ((tileX / tileSize) * tileSize);
                     tileY = ((tileY / tileSize) * tileSize);
-                    g.DrawImage(tiles[selectedTile].image, tileX, tileY, tileSize, tileSize);
+                    g.DrawImage(selectedTiles[selectedTile].image, tileX, tileY, tileSize, tileSize);
                 }
-                g.DrawString(string.Format("X: {0} Y: {1} Zoom: {2}x{2}", mouseX / tileSize, mouseY / tileSize, tileSize), tileTextFont, Brushes.White, 0, hScrollBarView.Location.Y - 20);
+
+                int mouseOverTileX = (mouseX / tileSize) + hScrollBarView.Value;
+                int mouseOverTileY = (mouseY / tileSize) + vScrollBarView.Value;
+                g.DrawString(string.Format("X: {0} Y: {1} Zoom: {2}x{2} Scroll: {3}x{4}", mouseOverTileX, mouseOverTileY, tileSize, hScrollBarView.Value, vScrollBarView.Value), tileTextFont, Brushes.White, 0, hScrollBarView.Location.Y - 20);
             }
         }
 
@@ -134,13 +172,20 @@ namespace MapMaker
             Invalidate();
         }
 
+        List<Tile> GetSelectedTiles()
+        {
+            return tileMode ? tiles : tilesSprites;
+        }
+
         private void MainForm_MouseClick(object sender, MouseEventArgs e)
         {
+            var selectedTiles = GetSelectedTiles();
+
             if (mouseY >= hScrollBar.Location.Y)
             {
                 for (int i = hScrollBar.Value; i < hScrollBar.Value + 10; i++)
                 {
-                    if (i < tiles.Count)
+                    if (i < selectedTiles.Count)
                     {
                         int x = ((5 + outputWidth) * (i - hScrollBar.Value));
                         var rect = new Rectangle(x, hScrollBar.Location.Y + 35, outputWidth, outputHeight);
@@ -199,13 +244,27 @@ namespace MapMaker
         {
             if (placingTiles)
             {
+                var selectedTiles = GetSelectedTiles();
                 var tilePiece = new TilePiece();
                 tilePiece.x = (mouseX / tileSize) + hScrollBarView.Value;
                 tilePiece.y = (mouseY / tileSize) + vScrollBarView.Value;
-                tilePiece.tile = tiles[selectedTile];
+                tilePiece.tile = selectedTiles[selectedTile];
 
-                if (tilePieces.FirstOrDefault(x => x.x == tilePiece.x && x.y == tilePiece.y && x.tile == tilePiece.tile) == null)
-                    tilePieces.Add(tilePiece);
+                if (tileMode)
+                {
+                    if (tilePieces.FirstOrDefault(x => x.x == tilePiece.x && x.y == tilePiece.y && x.tile == tilePiece.tile) == null)
+                        tilePieces.Add(tilePiece);
+                }
+                else
+                {
+                    // Sprite mode - so flip the existing
+                    var existingSprite = tilePieces.FirstOrDefault(x => x.x == tilePiece.x && x.y == tilePiece.y && x.tile == tilePiece.tile);
+                    if (existingSprite == null)
+                        tilePieces.Add(tilePiece);
+                    else
+                        existingSprite.facingRight = !existingSprite.facingRight;
+                }
+                
             }
 
             Invalidate();
@@ -222,7 +281,7 @@ namespace MapMaker
                 { 
                     foreach (var tilePiece in tilePieces)
                     {
-                        sw.WriteLine(string.Format("{0} {1} {2}", tilePiece.x, tilePiece.y, tilePiece.tile.shortName));
+                        sw.WriteLine(string.Format("{0} {1} {2} {3} {4}", tilePiece.x, tilePiece.y, tilePiece.tile.shortName, tilePiece.tile.isSprite ? "S" : "T", tilePiece.facingRight ? "R" : "L"));
                     }
                 }
             }
@@ -230,7 +289,7 @@ namespace MapMaker
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
+            var ofd = new OpenFileDialog();
             ofd.DefaultExt = "txt";
             ofd.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
             if (ofd.ShowDialog() == DialogResult.OK)
@@ -240,12 +299,16 @@ namespace MapMaker
                 foreach (var line in lines)
                 {
                     var split = line.Split(' ');
-                    if (split.Length == 3)
+                    if (split.Length == 5)
                     {
                         var newTilePiece = new TilePiece();
                         newTilePiece.x = int.Parse(split[0]);
                         newTilePiece.y = int.Parse(split[1]);
-                        newTilePiece.tile = tiles.First(x => x.shortName == split[2]);
+                        var tile = tiles.FirstOrDefault(x => x.shortName == split[2]);
+                        if (tile == null)
+                            tile = tilesSprites.First(x => x.shortName == split[2]);
+                        newTilePiece.tile = tile;
+                        newTilePiece.facingRight = (split[4] == "R");
                         tilePieces.Add(newTilePiece);
                     }
                 }
@@ -268,6 +331,15 @@ namespace MapMaker
             tilePieces.Clear();
             Invalidate();
         }
+
+        private void buttonMode_Click(object sender, EventArgs e)
+        {
+            tileMode = !tileMode;
+
+            hScrollBar.Maximum = GetSelectedTiles().Count;
+
+            Invalidate();
+        }
     }
 
     public class TilePiece
@@ -275,18 +347,24 @@ namespace MapMaker
         public Tile tile;
         public int x;
         public int y;
+        public bool facingRight = true;
     }
 
     public class Tile
     {
-        public Tile(string fileName)
+        public Tile(string fileName, bool isSprite = false)
         {
             image = new Bitmap(fileName);
+            flippedImage = new Bitmap(image);
+            flippedImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
             shortName = Path.GetFileName(fileName);
             this.fileName = fileName;
+            this.isSprite = isSprite;
         }
         public string fileName;
         public string shortName;
         public Bitmap image;
+        public Bitmap flippedImage;
+        public bool isSprite;
     }
 }

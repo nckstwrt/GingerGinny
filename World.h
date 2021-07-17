@@ -27,6 +27,7 @@ public:
     void FreeTileMap();
     void LoadMap(const char* szMapFile);
     Tile* SafeGetTile(int x, int y, int i);
+    void AddMonsterTemplate(const Monster& monsterToCopy);
     shared_ptr<Monster> AddMonster(const Monster &monsterToCopy, int x, int y, bool facingRight, ALIGNMENT alignment);
     void Update();
     void Draw();
@@ -44,6 +45,7 @@ public:
     int offsetY;
     SDLGame* pGame;
     vector<shared_ptr<Monster>> monsters;
+    vector<shared_ptr<Monster>> monsterTemplates;
     Tile ***tileMap;
     int tileMapWidth;
     int tileMapHeight;
