@@ -46,6 +46,12 @@ int main(int argc, char* argv[])
     ogre.characterWidth = 16;
     World.AddMonsterTemplate(ogre);
 
+    Monster orc_warrior;
+    orc_warrior.AddAnimationImages(ANIMATION::Idle, 6, 4, "DungeonTilesetII_v1.4/orc_warrior_idle_anim_f0.png", Game.LoadImage("images/DungeonTilesetII_v1.4/orc_warrior_idle_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/orc_warrior_idle_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/orc_warrior_idle_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/orc_warrior_idle_anim_f3.png"));
+    orc_warrior.AddAnimationImages(ANIMATION::Walk, 6, 4, "", Game.LoadImage("images/DungeonTilesetII_v1.4/orc_warrior_run_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/orc_warrior_run_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/orc_warrior_run_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/orc_warrior_run_anim_f3.png"));
+    orc_warrior.characterWidth = 16;
+    World.AddMonsterTemplate(orc_warrior);
+
     Monster demon;
     demon.AddAnimationImages(ANIMATION::Idle, 6, 4, "DungeonTilesetII_v1.4/big_demon_idle_anim_f0.png", Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_idle_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_idle_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_idle_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_idle_anim_f3.png"));
     demon.AddAnimationImages(ANIMATION::Walk, 6, 4, "", Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_run_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_run_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_run_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_run_anim_f3.png"));
@@ -64,6 +70,11 @@ int main(int argc, char* argv[])
     
 
     World.LoadMap("map2_version6.txt");
+
+    // Load Hearts
+    auto fullHeart = Game.LoadImage("images/DungeonTilesetII_v1.4/ui_heart_full.png");
+    auto halfHeart = Game.LoadImage("images/DungeonTilesetII_v1.4/ui_heart_half.png");
+    auto emptyHeart = Game.LoadImage("images/DungeonTilesetII_v1.4/ui_heart_empty.png");
     /*
     // Ginny is monster 0
     shared_ptr<Monster> pGinny = World.AddMonster(ginny, 6, 8, true, ALIGNMENT::GOOD);
@@ -134,7 +145,6 @@ int main(int argc, char* argv[])
 
     // Run Game
     bool showText = true;
-    vector<Point> points;
     while (runGame)
     {
         Game.ClearScreen();
@@ -162,45 +172,29 @@ int main(int argc, char* argv[])
         {
             World.MonsterAttack(World.pCameraFollow);
         }
-        /*
-        if (Game.keys[SDLK_b])
+        if (Game.keys[SDLK_p])
         {
-            //pOgre->MoveTo(pGinny->x+(pGinny->width/2), (pGinny->y+pGinny->height)-10);
-            points = World.MonsterMoveTo(pOgre, pGinny->GetMidPoint(true).x, pGinny->GetMidPoint(true).y);
-            Game.keys[SDLK_b] = false;
+            World.pCameraFollow->health--;
+            Game.keys[SDLK_p] = false;
         }
-        if (Game.keys[SDLK_c])
-        {
-            shared_ptr<Monster> temp = pGinny;
-            pGinny = pOgre;
-            pOgre = temp;
-            World.pCameraFollow = pGinny;
-            Game.keys[SDLK_c] = false;
-        }
-        if (Game.keys[SDLK_e])
-        {
-            int r = 50; // radius
-            int ox = pOgre->x, oy = pOgre->y; // origin
-
-            points.clear();
-            for (int x = -r; x < r; x++)
-            {
-                int height = (int)sqrt(r * r - x * x);
-
-                for (int y = -height; y < height; y++)
-                {
-                    points.push_back({ x + ox, y + oy });
-                }
-            }
-            Game.keys[SDLK_e] = false;
-        }*/
-
+       
         World.Update();
         World.Draw();
 
-        for (auto& point : points)
+        // Draw Health Hearts
+        int maxHealth = 6;
+        for (int hearts = 0; hearts < (maxHealth/2); hearts++)
         {
-            pixelRGBA(hw_surface, World.PixelXToDisplayPixelX(point.x), World.PixelYToDisplayPixelY(point.y), 255, 0, 0, 255);
+            int heartX = 5 + ((((maxHealth / 2)-1) - hearts) * (fullHeart->w + 4));
+            int watershed = (maxHealth - 1) - (hearts * 2);
+            auto drawHeart = fullHeart;
+
+            if (World.pCameraFollow->health == watershed)
+                drawHeart = halfHeart;
+            if (World.pCameraFollow->health < watershed)
+                drawHeart = emptyHeart;
+
+            Game.BlitImage(drawHeart, heartX, (hw_surface->h - 5) - drawHeart->h);
         }
 
         if (showText)

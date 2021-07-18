@@ -152,7 +152,8 @@ namespace MapMaker
                     int tileY = mouseY;
                     tileX = ((tileX / tileSize) * tileSize);
                     tileY = ((tileY / tileSize) * tileSize);
-                    g.DrawImage(selectedTiles[selectedTile].image, tileX, tileY, tileSize, tileSize);
+                    if (selectedTiles.Count < selectedTile)
+                        g.DrawImage(selectedTiles[selectedTile].image, tileX, tileY, tileSize, tileSize);
                 }
 
                 int mouseOverTileX = (mouseX / tileSize) + hScrollBarView.Value;

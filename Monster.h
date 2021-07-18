@@ -43,6 +43,7 @@ public:
     function<void(Monster*)> AI;
     bool walking;
     bool attacking;
+    int health;
     queue<DIRECTION> directions;
     World* pWorld;
     int lastMoveToX;

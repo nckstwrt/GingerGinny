@@ -9,6 +9,7 @@ Monster::Monster() :
     imgCurrentFrame(NULL),
     walking(false),
     attacking(false),
+    health(6),
     pWorld(NULL),
     lastMoveToX(0), lastMoveToY(0),
     chasingMonster(NULL),
