@@ -99,7 +99,7 @@ void World::LoadMap(const char* szMapFile)
             }
             else
             {
-                Monster spriteMonster;
+                Monster spriteMonster(this);
                 spriteMonster.AddAnimationImages(ANIMATION::Idle, 1000, 1, szImage, pGame->GetLoadedImage(szImage));
                 AddMonster(spriteMonster, x, y, rightOrleft == 'R', ALIGNMENT::NEUTRAL);
             }
@@ -211,10 +211,14 @@ void World::Update()
             SafeGetTile(x, y, 0)->Update();
 
     // Update all Monsters
+    vector<shared_ptr<Monster>> deadMonsters;
     for (auto &monster : monsters)
     {
         monster->Update();
     }
+
+    // If dying animation over and dead, remove
+    monsters.erase(remove_if(monsters.begin(), monsters.end(), [](auto& monster) { return (monster->health <= 0 && monster->hurtCounter == 0); }), monsters.end());
 
     // Sort the monsters by Y order
     sort(monsters.begin(), monsters.end(), [](const shared_ptr<Monster> a, const shared_ptr<Monster> b) -> bool { return a->y+a->height < b->y+b->height; });
@@ -306,7 +310,7 @@ void World::Draw()
     for (auto& point : debugPoints)
         pGame->DrawPoint(PixelXToDisplayPixelX(point.x), PixelYToDisplayPixelY(point.y), SDLColor(255, 0, 0));
     for (auto& rect : debugRects)
-        pGame->DrawRect(PixelXToDisplayPixelX(rect.x), PixelYToDisplayPixelY(rect.y), rect.width, rect.height, SDLColor(255, 0, 0, 60));
+        pGame->DrawRect(TileXToDisplayPixelX(rect.x), TileYToDisplayPixelY(rect.y), rect.width, rect.height, SDLColor(255, 0, 0, 60));
 }
 
 int World::TileXToDisplayPixelX(int tileX)
@@ -329,11 +333,11 @@ int World::PixelYToDisplayPixelY(int pixelY)
     return (pixelY - offsetY);
 }
 
-bool World::MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction, bool alwaysMoveBack)
+bool World::MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction, bool facingChange, bool alwaysMoveBack)
 {
     int savedX = pMonster->x;
     int savedY = pMonster->y;
-    pMonster->Move(direction);
+    pMonster->Move(direction, facingChange);
 
     auto monsterRect = pMonster->GetRect(true);
     int monsterX1 = monsterRect.x + 1;

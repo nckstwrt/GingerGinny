@@ -45,6 +45,9 @@ void Animation::ResetAnimation()
 
 SDL_Surface* Animation::CurrentImage(bool facingRight)
 {
+    if (facingRight ? imagesRight.size() <= currentImage : imagesLeft.size() <= currentImage)
+        printf("What the fk\n");
+
     return facingRight ? imagesRight[currentImage] : imagesLeft[currentImage];
 }
 

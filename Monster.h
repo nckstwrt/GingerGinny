@@ -17,12 +17,12 @@ class World;
 class Monster
 {
 public:
-    Monster();
+    Monster(World* pWorld);
     Monster(const Monster &monster);
 
     Animation* AddAnimationImages(ANIMATION animation, int imageCycleDelay, int imageCount, string firstImageName, ...);
 
-    void Move(DIRECTION direction);
+    void Move(DIRECTION direction, bool facingChange = true);
     void MoveTo(int moveToX, int moveToY, bool carryOnFromLastDirection = false);
     void Attack();
     void Update();
@@ -31,6 +31,7 @@ public:
     Rect GetRect(bool justFeet = false);
     Point GetMidPoint(bool fromFeet = false);
     bool HasImage(const char* szImage);
+    bool TakeDamage(int damage = 1);
 
     static void ChaseAI(Monster* pMonster);
 
@@ -50,7 +51,8 @@ public:
     int lastMoveToY;
     shared_ptr<Monster> chasingMonster;
     ALIGNMENT alignment;
-    bool blocking;
+    bool blocking;  // Means the monster blocks monsters passing (i.e. is solid)
+    int hurtCounter;
 
 private:
     shared_ptr<Monster> GetUs();

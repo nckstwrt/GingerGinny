@@ -32,42 +32,48 @@ int main(int argc, char* argv[])
 
     auto harryPotterSprites = Game.LoadImage("images/pixel_harry_potter_sprites_by_mudkat101-da3f0nk_small2.png");
 
-    Monster ginny;
+    Monster ginny(&World);
     Animation *idleAnim = ginny.AddAnimationImages(ANIMATION::Idle, 12, 2, "idle_000_vsmall.png", Game.LoadImage("images/idle_000_vsmall.png"), Game.LoadImage("images/idle_001_vsmall.png"));
     idleAnim->SetAnimationDelay(0, 200);
     ginny.AddAnimationImages(ANIMATION::Walk, 6, 4, "", Game.LoadImage("images/walk_000_vsmall.png"), Game.LoadImage("images/walk_001_vsmall.png"), Game.LoadImage("images/walk_002_vsmall.png"), Game.LoadImage("images/walk_003_vsmall.png"));
     ginny.AddAnimationImages(ANIMATION::Attack, 4, 5, "", Game.LoadImage("images/attack_000_vsmall.png"), Game.LoadImage("images/attack_001_vsmall.png"), Game.LoadImage("images/attack_002_vsmall.png"), Game.LoadImage("images/attack_003_vsmall.png"), Game.LoadImage("images/attack_004_vsmall.png"));
+    ginny.AddAnimationImages(ANIMATION::Hurt, 8, 3, "", Game.LoadImage("images/hurt_000_vsmall.png"), Game.LoadImage("images/hurt_001_vsmall.png"), Game.LoadImage("images/hurt_002_vsmall.png"));
     ginny.characterWidth = 22;
     World.AddMonsterTemplate(ginny, ALIGNMENT::GOOD);
 
-    Monster ogre;
+    Monster ogre(&World);
     ogre.AddAnimationImages(ANIMATION::Idle, 6, 4, "DungeonTilesetII_v1.4/ogre_idle_anim_f0.png", Game.LoadImage("images/DungeonTilesetII_v1.4/ogre_idle_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/ogre_idle_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/ogre_idle_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/ogre_idle_anim_f3.png"));
     ogre.AddAnimationImages(ANIMATION::Walk, 6, 4, "", Game.LoadImage("images/DungeonTilesetII_v1.4/ogre_run_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/ogre_run_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/ogre_run_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/ogre_run_anim_f3.png"));
     ogre.characterWidth = 16;
+    ogre.health = 2;
     World.AddMonsterTemplate(ogre);
 
-    Monster orc_warrior;
+    Monster orc_warrior(&World);
     orc_warrior.AddAnimationImages(ANIMATION::Idle, 6, 4, "DungeonTilesetII_v1.4/orc_warrior_idle_anim_f0.png", Game.LoadImage("images/DungeonTilesetII_v1.4/orc_warrior_idle_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/orc_warrior_idle_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/orc_warrior_idle_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/orc_warrior_idle_anim_f3.png"));
     orc_warrior.AddAnimationImages(ANIMATION::Walk, 6, 4, "", Game.LoadImage("images/DungeonTilesetII_v1.4/orc_warrior_run_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/orc_warrior_run_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/orc_warrior_run_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/orc_warrior_run_anim_f3.png"));
     orc_warrior.characterWidth = 16;
+    orc_warrior.health = 3;
     World.AddMonsterTemplate(orc_warrior);
 
-    Monster demon;
+    Monster demon(&World);
     demon.AddAnimationImages(ANIMATION::Idle, 6, 4, "DungeonTilesetII_v1.4/big_demon_idle_anim_f0.png", Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_idle_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_idle_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_idle_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_idle_anim_f3.png"));
     demon.AddAnimationImages(ANIMATION::Walk, 6, 4, "", Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_run_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_run_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_run_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_demon_run_anim_f3.png"));
     demon.characterWidth = 16;
+    demon.health = 3;
     World.AddMonsterTemplate(demon);
 
-    Monster zombie;
+    Monster zombie(&World);
     zombie.AddAnimationImages(ANIMATION::Idle, 6, 4, "DungeonTilesetII_v1.4/big_zombie_idle_anim_f0.png", Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_idle_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_idle_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_idle_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_idle_anim_f3.png"));
     zombie.AddAnimationImages(ANIMATION::Walk, 6, 4, "", Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f0.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f1.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f2.png"), Game.LoadImage("images/DungeonTilesetII_v1.4/big_zombie_run_anim_f3.png"));
     zombie.characterWidth = 16;
+    zombie.health = 2;
     World.AddMonsterTemplate(zombie);
 
-    Monster hagrid;
+    /*
+    Monster hagrid(&World);
     SDL_Surface* hagridImg = Game.GetImageFromSheet(harryPotterSprites, 150, 234, 190 - 150, 280 - 234);
     hagrid.AddAnimationImages(ANIMATION::Idle, 1, 1, "", hagridImg);
-    
+*/    
 
     World.LoadMap("map2_version6.txt");
 

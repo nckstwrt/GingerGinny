@@ -22,7 +22,8 @@ enum class ANIMATION
     Walk,
     Run,
     Jump,
-    Attack
+    Attack,
+    Hurt
 };
 
 class Animation

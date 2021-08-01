@@ -212,5 +212,3 @@ void SDLGame::ResetKeys()
 {
     memset(&keys, 0, sizeof(keys));
 }
-
-vector<SDL_Surface*> SDLGame::createdImages;

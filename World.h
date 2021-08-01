@@ -35,7 +35,7 @@ public:
     int TileYToDisplayPixelY(int tileY);
     int PixelXToDisplayPixelX(int pixelX);
     int PixelYToDisplayPixelY(int pixelY);
-    bool MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction, bool alwaysMoveBack = false);
+    bool MonsterMove(shared_ptr<Monster> pMonster, DIRECTION direction, bool facingChange = true, bool alwaysMoveBack = false);
     vector<Point> MonsterMoveTo(shared_ptr<Monster> pMonster, int x, int y);
     void MonsterAttack(shared_ptr<Monster> pMonster);
     int DrawTextBox(TTF_Font* font, const char* szText);
