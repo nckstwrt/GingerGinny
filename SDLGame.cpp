@@ -114,19 +114,25 @@ void SDLGame::FreeImage(const char* szImageFile)
 
 void SDLGame::BlitImage(SDL_Surface* img, int x, int y)
 {
-    SDL_Rect targetRect;
-    targetRect.x = x;
-    targetRect.y = y;
-    targetRect.w = img->w;
-    targetRect.h = img->h;
-    SDL_BlitSurface(img, NULL, hw_surface, &targetRect);
+    if (img)
+    {
+        SDL_Rect targetRect;
+        targetRect.x = x;
+        targetRect.y = y;
+        targetRect.w = img->w;
+        targetRect.h = img->h;
+        SDL_BlitSurface(img, NULL, hw_surface, &targetRect);
+    }
 }
 
 void SDLGame::BlitImage(SDL_Surface* img, int srcX, int srcY, int w, int h, int x, int y)
 {
-    SDL_Rect sourceRect = { .x = (Sint16)srcX, .y = (Sint16)srcY, .w = (Uint16)w, .h = (Uint16)h };
-    SDL_Rect targetRect = { .x = (Sint16)x, .y = (Sint16)y, .w = (Uint16)w, .h = (Uint16)h };
-    SDL_BlitSurface(img, &sourceRect, hw_surface, &targetRect);
+    if (img)
+    {
+        SDL_Rect sourceRect = { .x = (Sint16)srcX, .y = (Sint16)srcY, .w = (Uint16)w, .h = (Uint16)h };
+        SDL_Rect targetRect = { .x = (Sint16)x, .y = (Sint16)y, .w = (Uint16)w, .h = (Uint16)h };
+        SDL_BlitSurface(img, &sourceRect, hw_surface, &targetRect);
+    }
 }
 
 SDL_Surface* SDLGame::GetImageFromSheet(SDL_Surface* img, int srcX, int srcY, int w, int h)

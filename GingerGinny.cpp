@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
     ginny.AddAnimationImages(ANIMATION::Walk, 6, 4, "", Game.LoadImage("images/walk_000_vsmall.png"), Game.LoadImage("images/walk_001_vsmall.png"), Game.LoadImage("images/walk_002_vsmall.png"), Game.LoadImage("images/walk_003_vsmall.png"));
     ginny.AddAnimationImages(ANIMATION::Attack, 4, 5, "", Game.LoadImage("images/attack_000_vsmall.png"), Game.LoadImage("images/attack_001_vsmall.png"), Game.LoadImage("images/attack_002_vsmall.png"), Game.LoadImage("images/attack_003_vsmall.png"), Game.LoadImage("images/attack_004_vsmall.png"));
     ginny.AddAnimationImages(ANIMATION::Hurt, 8, 3, "", Game.LoadImage("images/hurt_000_vsmall.png"), Game.LoadImage("images/hurt_001_vsmall.png"), Game.LoadImage("images/hurt_002_vsmall.png"));
-    ginny.characterWidth = 22;
+    ginny.characterWidth = 16;
     World.AddMonsterTemplate(ginny, ALIGNMENT::GOOD);
 
     Monster ogre(&World);

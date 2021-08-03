@@ -218,7 +218,21 @@ void World::Update()
     }
 
     // If dying animation over and dead, remove
-    monsters.erase(remove_if(monsters.begin(), monsters.end(), [](auto& monster) { return (monster->health <= 0 && monster->hurtCounter == 0); }), monsters.end());
+    monsters.erase(remove_if(monsters.begin(), monsters.end(), [this](auto& monster) 
+    { 
+        if (monster->health <= 0 && monster->hurtCounter == 0)
+        {
+            // This might be a chased monster, if so, no longer chase
+            for (auto& checkMonster : monsters)
+            {
+                if (checkMonster->chasingMonster == monster)
+                    checkMonster->chasingMonster = NULL;
+            }
+            return true;
+        }
+        else
+            return false;
+    }), monsters.end());
 
     // Sort the monsters by Y order
     sort(monsters.begin(), monsters.end(), [](const shared_ptr<Monster> a, const shared_ptr<Monster> b) -> bool { return a->y+a->height < b->y+b->height; });
@@ -392,6 +406,7 @@ vector<Point> World::MonsterMoveTo(shared_ptr<Monster> pMonster, int x, int y)
     pathFinder.clearMonsters();
 
     // Add all other monsters in
+    /* Don't add monsters else they'll block each other (which will mean they will find another route)
     for (auto& monster : monsters)
     {
         if (monster->blocking)
@@ -408,7 +423,7 @@ vector<Point> World::MonsterMoveTo(shared_ptr<Monster> pMonster, int x, int y)
             }
         }
     }
-
+    */
     // Run the A* Search
     auto path = pathFinder.findPath({ pMonster->GetMidPoint(true).x / TILE_SIZE, pMonster->GetMidPoint(true).y / TILE_SIZE }, { x / TILE_SIZE, y / TILE_SIZE });
     

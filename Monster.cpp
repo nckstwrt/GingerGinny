@@ -122,7 +122,7 @@ void Monster::Attack()
             {
                 if (monster->hurtCounter == 0)
                 {
-                    monster->hurtCounter = 25;
+                    monster->hurtCounter = 90;
                     monster->health--;
                 }
             }
@@ -155,15 +155,28 @@ void Monster::Update()
         else
         {
             directions = queue<DIRECTION>();
-            pWorld->MonsterMove(GetUs(), facingRight ? DIRECTION::Left : DIRECTION::Right, false);
+            if (hurtCounter > 90-30)
+                pWorld->MonsterMove(GetUs(), facingRight ? DIRECTION::Left : DIRECTION::Right, false);
+            else
+            {
+                // If no hurt animation do walk animation
+                imgCurrentFrame = animations[ANIMATION::Walk].CurrentImage(facingRight);
+                animations[ANIMATION::Walk].Increment();
+                if (animations.find(ANIMATION::Idle) != animations.end())
+                    animations[ANIMATION::Idle].ResetAnimation();
+
+                // If not dead, don't do death animation
+                if (health != 0)
+                    hurtCounter = 1; // so it becomes zero
+                else
+                {
+                    // Flash the image if dying
+                    if ((hurtCounter % 10) < 5)
+                        imgCurrentFrame = NULL;
+                }
+            }
 
             hurtCounter--;
-
-            // If no hurt animation do walk animation
-            imgCurrentFrame = animations[ANIMATION::Walk].CurrentImage(facingRight);
-            animations[ANIMATION::Walk].Increment();
-            if (animations.find(ANIMATION::Idle) != animations.end())
-                animations[ANIMATION::Idle].ResetAnimation();
         }
     }
     else
