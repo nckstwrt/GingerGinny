@@ -254,14 +254,14 @@ void World::Update()
         offsetY = 0;
 }
 
-void World::Draw()
+void World::DrawTiles(bool bottomTiles)
 {
-    // Draw Map
     int startTileX = offsetX / TILE_SIZE;
     int startTileY = offsetY / TILE_SIZE;
-    for (int y = 0; y < (SCREEN_HEIGHT / TILE_SIZE)+1; y++)
+
+    for (int y = 0; y < (SCREEN_HEIGHT / TILE_SIZE) + 1; y++)
     {
-        for (int x = 0; x < (SCREEN_WIDTH / TILE_SIZE)+1; x++)
+        for (int x = 0; x < (SCREEN_WIDTH / TILE_SIZE) + 1; x++)
         {
             if (startTileY + y < tileMapHeight && startTileX + x < tileMapWidth)
             {
@@ -275,7 +275,10 @@ void World::Draw()
                             int pixelX = TileXToDisplayPixelX(pTile->x);
                             int pixelY = TileYToDisplayPixelY(pTile->y);
 
-                            if ((pTile->tileType == TILE_TYPE::FLOOR || (startTileY + y + 2 < tileMapHeight && tileMap[startTileY + y + 2][startTileX + x] != NULL)) && pTile->tileType != TILE_TYPE::WALL_ALWAYS_ON_TOP)
+                            if (bottomTiles && (pTile->tileType == TILE_TYPE::FLOOR || (startTileY + y + 2 < tileMapHeight && tileMap[startTileY + y + 2][startTileX + x] != NULL)) && pTile->tileType != TILE_TYPE::WALL_ALWAYS_ON_TOP)
+                               pGame->BlitImage(pTile->GetCurrentImage(), pixelX, pixelY);
+
+                            if (!bottomTiles && (!(pTile->tileType == TILE_TYPE::FLOOR || (startTileY + y + 2 < tileMapHeight && tileMap[startTileY + y + 2][startTileX + x] != NULL)) || pTile->tileType == TILE_TYPE::WALL_ALWAYS_ON_TOP))
                                 pGame->BlitImage(pTile->GetCurrentImage(), pixelX, pixelY);
                         }
                         else
@@ -285,6 +288,12 @@ void World::Draw()
             }
         }
     }
+}
+
+void World::Draw()
+{
+    // Draw Map
+    DrawTiles(true);
 
     // Draw monsters
     for (auto &monster : monsters)
@@ -293,32 +302,7 @@ void World::Draw()
     }
 
     // Draw parts of the floor + walls that should be over Ginny and the monsters
-    for (int y = 0; y < (SCREEN_HEIGHT / TILE_SIZE)+1; y++)
-    {
-        for (int x = 0; x < (SCREEN_WIDTH / TILE_SIZE)+1; x++)
-        {
-            if (startTileY + y < tileMapHeight && startTileX + x < tileMapWidth)
-            {
-                if (tileMap[startTileY + y][startTileX + x] != NULL)
-                {
-                    for (int i = 0; i < MAX_TILE_PER_SQUARE; i++)
-                    {
-                        Tile* pTile = &tileMap[startTileY + y][startTileX + x][i];
-                        if (pTile != NULL && pTile->GetCurrentImage() != NULL)
-                        {
-                            int pixelX = TileXToDisplayPixelX(pTile->x);
-                            int pixelY = TileYToDisplayPixelY(pTile->y);
-
-                            if (!(pTile->tileType == TILE_TYPE::FLOOR || (startTileY + y + 2 < tileMapHeight && tileMap[startTileY + y + 2][startTileX + x] != NULL)) || pTile->tileType == TILE_TYPE::WALL_ALWAYS_ON_TOP)
-                                pGame->BlitImage(pTile->GetCurrentImage(), pixelX, pixelY);
-                        }
-                        else
-                            break;
-                    }
-                }
-            }
-        }
-    }
+    DrawTiles(false);
 
     // Draw any debug points or rectangles
     for (auto& point : debugPoints)
@@ -449,7 +433,7 @@ void World::MonsterAttack(shared_ptr<Monster> pMonster)
     pMonster->Attack();
 }
 
-int World::DrawTextBox(TTF_Font* font, const char* szText)
+int World::DrawTextBox(TTF_Font* font, const char* szText, SDLColor textColor)
 {
     int ret = 0;
     int textBoxHeightStart = SCREEN_HEIGHT - 70;
@@ -459,7 +443,7 @@ int World::DrawTextBox(TTF_Font* font, const char* szText)
     SDLColor triangeColor = SDLColor(30, 30, 30);
     pGame->DrawRect(outerIndent, textBoxHeightStart, SCREEN_WIDTH - (2 * outerIndent), SCREEN_HEIGHT - (textBoxHeightStart + outerIndent), backGroundColor, RECTANGLE_TYPE::FILLED_ROUNDED, 5);
     pGame->DrawRect(outerIndent + innerIndent, textBoxHeightStart + innerIndent, SCREEN_WIDTH - (2 * (outerIndent + innerIndent)), SCREEN_HEIGHT - (textBoxHeightStart + innerIndent + outerIndent + innerIndent), SDLColor(127, 127, 127), RECTANGLE_TYPE::BOX_ROUNDED, 5);
-    pGame->OutputText(font, szText, SDLColor(40, 40, 40), outerIndent + (innerIndent * 2), textBoxHeightStart + outerIndent + innerIndent, SCREEN_WIDTH - (outerIndent + (innerIndent * 2)));
+    pGame->OutputText(font, szText, textColor, (outerIndent + (innerIndent * 2) + 2), textBoxHeightStart + outerIndent + innerIndent, SCREEN_WIDTH - ((outerIndent + (innerIndent * 2) + 2)));
     filledTrigonColor(pGame->GetSurface(), SCREEN_WIDTH - 20, SCREEN_HEIGHT - 18, SCREEN_WIDTH - 10, SCREEN_HEIGHT - 18, SCREEN_WIDTH - 15, SCREEN_HEIGHT - 10, triangeColor.ReversedUInt());
 
     Uint32 counter = 0;

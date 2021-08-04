@@ -53,28 +53,31 @@ Animation* Monster::AddAnimationImages(ANIMATION animationType, int imageCycleDe
 
 void Monster::Move(DIRECTION direction, bool facingChange)
 {
-    if (!attacking)
+    if (health > 0)
     {
-        switch (direction)
+        if (!attacking)
         {
-        case DIRECTION::Left:
-            if (facingChange)
-                facingRight = false;
-            x -= 1;
-            break;
-        case DIRECTION::Right:
-            if (facingChange)
-                facingRight = true;
-            x += 1;
-            break;
-        case DIRECTION::Up:
-            y--;
-            break;
-        case DIRECTION::Down:
-            y++;
-            break;
+            switch (direction)
+            {
+            case DIRECTION::Left:
+                if (facingChange)
+                    facingRight = false;
+                x -= 1;
+                break;
+            case DIRECTION::Right:
+                if (facingChange)
+                    facingRight = true;
+                x += 1;
+                break;
+            case DIRECTION::Up:
+                y--;
+                break;
+            case DIRECTION::Down:
+                y++;
+                break;
+            }
+            walking = true;
         }
-        walking = true;
     }
 }
 
@@ -148,8 +151,9 @@ void Monster::Update()
     {
         if (animations.find(ANIMATION::Hurt) != animations.end())
         {
-            imgCurrentFrame = animations[ANIMATION::Hurt].CurrentImage(facingRight);
-            if (animations[ANIMATION::Hurt].Increment()) 
+            ANIMATION animType = (health == 0) ? ANIMATION::Death : ANIMATION::Hurt;
+            imgCurrentFrame = animations[animType].CurrentImage(facingRight);
+            if (animations[animType].Increment())
                 hurtCounter = 0;
         }
         else
@@ -322,7 +326,7 @@ void Monster::ChaseAI(Monster *pMonster)
 
             // Check if we're close enough to hit Ginny
             auto distanceToMonster = pMonster->GetMidPoint().DistanceTo(pMonster->chasingMonster->GetMidPoint());
-            if (distanceToMonster < 22)
+            if (distanceToMonster < 25 && ((pMonster->facingRight && pMonster->x <= pMonster->chasingMonster->x) || (!pMonster->facingRight && pMonster->x >= pMonster->chasingMonster->x)))
             {
                 pMonster->chasingMonster->TakeDamage();
             }

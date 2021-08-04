@@ -23,7 +23,8 @@ enum class ANIMATION
     Run,
     Jump,
     Attack,
-    Hurt
+    Hurt,
+    Death
 };
 
 class Animation

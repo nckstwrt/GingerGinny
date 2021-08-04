@@ -38,6 +38,8 @@ int main(int argc, char* argv[])
     ginny.AddAnimationImages(ANIMATION::Walk, 6, 4, "", Game.LoadImage("images/walk_000_vsmall.png"), Game.LoadImage("images/walk_001_vsmall.png"), Game.LoadImage("images/walk_002_vsmall.png"), Game.LoadImage("images/walk_003_vsmall.png"));
     ginny.AddAnimationImages(ANIMATION::Attack, 4, 5, "", Game.LoadImage("images/attack_000_vsmall.png"), Game.LoadImage("images/attack_001_vsmall.png"), Game.LoadImage("images/attack_002_vsmall.png"), Game.LoadImage("images/attack_003_vsmall.png"), Game.LoadImage("images/attack_004_vsmall.png"));
     ginny.AddAnimationImages(ANIMATION::Hurt, 8, 3, "", Game.LoadImage("images/hurt_000_vsmall.png"), Game.LoadImage("images/hurt_001_vsmall.png"), Game.LoadImage("images/hurt_002_vsmall.png"));
+    auto deathAnim = ginny.AddAnimationImages(ANIMATION::Death, 8, 4, "", Game.LoadImage("images/hurt_003_vsmall.png"), Game.LoadImage("images/hurt_004_vsmall.png"), Game.LoadImage("images/hurt_005_vsmall.png"), Game.LoadImage("images/hurt_006_vsmall.png"));
+    deathAnim->SetAnimationDelay(3, 200);
     ginny.characterWidth = 16;
     World.AddMonsterTemplate(ginny, ALIGNMENT::GOOD);
 
@@ -205,7 +207,7 @@ int main(int argc, char* argv[])
 
         if (showText)
         {
-            if (World.DrawTextBox(chary, "Teenage Mutant Ginger Ginny is here. And she is.... Evil!") == -1)
+            if (World.DrawTextBox(chary, "Teenage Mutant Ginger Ginny is here. And she is.... Evil!", GINNY_COLOR) == -1)
                 break;
             if (World.DrawTextBox(chary, "....Or is she?") == -1)
                 break;
