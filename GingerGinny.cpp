@@ -160,25 +160,28 @@ int main(int argc, char* argv[])
         if (Game.PollEvents().type == SDL_QUIT || Game.keys[SDLK_q] || Game.keys[SDLK_ESCAPE])
             break;
 
-        if (Game.keys[SDLK_LEFT] || Game.keys[SDLK_l])
+        if (World.pCameraFollow->health > 0)
         {
-            World.MonsterMove(World.pCameraFollow, DIRECTION::Left);
-        }
-        if (Game.keys[SDLK_RIGHT] || Game.keys[SDLK_r])
-        {
-            World.MonsterMove(World.pCameraFollow, DIRECTION::Right);
-        }
-        if (Game.keys[SDLK_UP] || Game.keys[SDLK_u])
-        {
-            World.MonsterMove(World.pCameraFollow, DIRECTION::Up);
-        }
-        if (Game.keys[SDLK_DOWN] || Game.keys[SDLK_d])
-        {
-            World.MonsterMove(World.pCameraFollow, DIRECTION::Down);
-        }
-        if (Game.keys[SDLK_a])
-        {
-            World.MonsterAttack(World.pCameraFollow);
+            if (Game.keys[SDLK_LEFT] || Game.keys[SDLK_l])
+            {
+                World.MonsterMove(World.pCameraFollow, DIRECTION::Left);
+            }
+            if (Game.keys[SDLK_RIGHT] || Game.keys[SDLK_r])
+            {
+                World.MonsterMove(World.pCameraFollow, DIRECTION::Right);
+            }
+            if (Game.keys[SDLK_UP] || Game.keys[SDLK_u])
+            {
+                World.MonsterMove(World.pCameraFollow, DIRECTION::Up);
+            }
+            if (Game.keys[SDLK_DOWN] || Game.keys[SDLK_d])
+            {
+                World.MonsterMove(World.pCameraFollow, DIRECTION::Down);
+            }
+            if (Game.keys[SDLK_a])
+            {
+                World.MonsterAttack(World.pCameraFollow);
+            }
         }
         if (Game.keys[SDLK_p])
         {

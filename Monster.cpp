@@ -53,31 +53,28 @@ Animation* Monster::AddAnimationImages(ANIMATION animationType, int imageCycleDe
 
 void Monster::Move(DIRECTION direction, bool facingChange)
 {
-    if (health > 0)
+    if (!attacking)
     {
-        if (!attacking)
+        switch (direction)
         {
-            switch (direction)
-            {
-            case DIRECTION::Left:
-                if (facingChange)
-                    facingRight = false;
-                x -= 1;
-                break;
-            case DIRECTION::Right:
-                if (facingChange)
-                    facingRight = true;
-                x += 1;
-                break;
-            case DIRECTION::Up:
-                y--;
-                break;
-            case DIRECTION::Down:
-                y++;
-                break;
-            }
-            walking = true;
+        case DIRECTION::Left:
+            if (facingChange)
+                facingRight = false;
+            x -= 1;
+            break;
+        case DIRECTION::Right:
+            if (facingChange)
+                facingRight = true;
+            x += 1;
+            break;
+        case DIRECTION::Up:
+            y--;
+            break;
+        case DIRECTION::Down:
+            y++;
+            break;
         }
+        walking = true;
     }
 }
 
