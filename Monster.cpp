@@ -323,9 +323,13 @@ void Monster::ChaseAI(Monster *pMonster)
 
             // Check if we're close enough to hit Ginny
             auto distanceToMonster = pMonster->GetMidPoint().DistanceTo(pMonster->chasingMonster->GetMidPoint());
-            if (distanceToMonster < 25 && ((pMonster->facingRight && pMonster->x <= pMonster->chasingMonster->x) || (!pMonster->facingRight && pMonster->x >= pMonster->chasingMonster->x)))
+            if (distanceToMonster < 25)
             {
-                pMonster->chasingMonster->TakeDamage();
+                // Check if facing the right way, if not, face the other way :)
+                if ((pMonster->facingRight && pMonster->x <= pMonster->chasingMonster->x) || (!pMonster->facingRight && pMonster->x >= pMonster->chasingMonster->x))
+                    pMonster->chasingMonster->TakeDamage();
+                else
+                    pMonster->facingRight = !pMonster->facingRight;
             }
             else
             {
