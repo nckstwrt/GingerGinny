@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 
     Game.SetupScreen(screen_width, screen_height, fullScreen, useHWSurface, upsideDown);
 
-    SDL_Surface* hw_surface = Game.GetSurface();
+    SDL_Surface* surface_buffer = Game.GetSurface();
 
     auto harryPotterSprites = Game.LoadImage("images/pixel_harry_potter_sprites_by_mudkat101-da3f0nk_small2.png");
 
@@ -232,16 +232,6 @@ int main(int argc, char* argv[])
             {
                 World.MonsterAttack(World.pCameraFollow);
             }
-
-            /*
-            for (int k = 0; k < 323; k++)
-            {
-                if (Game.keys[k] != 0)
-                {
-                    fprintf(fout, "Key Down: %d", k);
-                    fflush(fout);
-                }
-            }*/
         }
         if (Game.keys[SDLK_p])
         {
@@ -265,7 +255,7 @@ int main(int argc, char* argv[])
             if (World.pCameraFollow->health < watershed)
                 drawHeart = emptyHeart;
 
-            Game.BlitImage(drawHeart, heartX, (hw_surface->h - 5) - drawHeart->h);
+            Game.BlitImage(drawHeart, heartX, (surface_buffer->h - 5) - drawHeart->h);
         }
 
         if (showText)
