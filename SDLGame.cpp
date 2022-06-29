@@ -1,6 +1,6 @@
 #include "SDLGame.h"
 
-SDLGame::SDLGame() : fpsManager{ 0 }, hw_surface(NULL), lastKeyPressed(0)
+SDLGame::SDLGame() : fpsManager{ 0 }, surface_buffer(NULL), lastKeyPressed(0)
 {
     for (int i = 0; i < SDLK_LAST; i++)
         keys[i] = false;
@@ -17,37 +17,66 @@ SDLGame::~SDLGame()
         SDL_FreeSurface(img);
     }
 
-    if (hw_surface != NULL)
+    if (surface_buffer != NULL && real_surface != surface_buffer)
     {
-        SDL_FreeSurface(hw_surface);
+        SDL_FreeSurface(surface_buffer);
+    }
+
+    if (real_surface != NULL)
+    {
+        SDL_FreeSurface(real_surface);
         SDL_Quit();
     }
 }
 
-bool SDLGame::SetupScreen(int width, int height, bool fullScreen)
+bool SDLGame::SetupScreen(int width, int height, bool fullScreen, bool useHWSurface, bool upsideDown)
 {
+    screen_width = width;
+    screen_height = height;
+    this->upsideDown = upsideDown;
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
     TTF_Init();
-    hw_surface = SDL_SetVideoMode(width, height, 32, SDL_HWSURFACE | SDL_DOUBLEBUF | (fullScreen ? SDL_FULLSCREEN : 0));
+    real_surface = SDL_SetVideoMode(width, height, 32, (useHWSurface ? (SDL_HWSURFACE | SDL_DOUBLEBUF) : 0) | (fullScreen ? SDL_FULLSCREEN : 0));
+
+    if (useHWSurface)
+        surface_buffer = real_surface;
+    else
+    {
+        surface_buffer = SDL_CreateRGBSurface(real_surface->flags, real_surface->w, real_surface->h, 32, 0, 0, 0, 0);
+    }
+
     SDL_ShowCursor(0);
     SDL_initFramerate(&fpsManager);
     SDL_setFramerate(&fpsManager, 50);
-    return (hw_surface != NULL);
+    return (surface_buffer != NULL);
 }
 
 void SDLGame::ClearScreen()
 {
-    SDL_FillRect(hw_surface, NULL, 0x000000);
+    SDL_FillRect(surface_buffer, NULL, 0x000000);
 }
 
 void SDLGame::ClearScreen(SDLColor c)
 {
-    SDL_FillRect(hw_surface, NULL, c);
+    SDL_FillRect(surface_buffer, NULL, c);
 }
 
 void SDLGame::FlipScreen()
 {
-    SDL_Flip(hw_surface);
+    if (upsideDown)
+    {
+        SDL_Surface* flippedSurface = rotozoomSurfaceXY(surface_buffer, 0, -1, -1, SMOOTHING_OFF);
+        SDL_FillRect(real_surface, NULL, 0x000000);
+        SDL_BlitSurface(flippedSurface, NULL, real_surface, NULL);
+        SDL_Flip(real_surface);
+        SDL_FreeSurface(flippedSurface);
+    }
+    else
+    { 
+        SDL_FillRect(real_surface, NULL, 0x000000);
+        SDL_BlitSurface(surface_buffer, NULL, real_surface, NULL);
+        SDL_Flip(real_surface);
+    }
 }
 
 SDL_Event SDLGame::PollEvents()
@@ -121,7 +150,7 @@ void SDLGame::BlitImage(SDL_Surface* img, int x, int y)
         targetRect.y = y;
         targetRect.w = img->w;
         targetRect.h = img->h;
-        SDL_BlitSurface(img, NULL, hw_surface, &targetRect);
+        SDL_BlitSurface(img, NULL, surface_buffer, &targetRect);
     }
 }
 
@@ -131,7 +160,7 @@ void SDLGame::BlitImage(SDL_Surface* img, int srcX, int srcY, int w, int h, int 
     {
         SDL_Rect sourceRect = { .x = (Sint16)srcX, .y = (Sint16)srcY, .w = (Uint16)w, .h = (Uint16)h };
         SDL_Rect targetRect = { .x = (Sint16)x, .y = (Sint16)y, .w = (Uint16)w, .h = (Uint16)h };
-        SDL_BlitSurface(img, &sourceRect, hw_surface, &targetRect);
+        SDL_BlitSurface(img, &sourceRect, surface_buffer, &targetRect);
     }
 }
 
@@ -158,28 +187,35 @@ SDL_Surface* SDLGame::CreateHorizontallyFlippedImage(SDL_Surface* img)
     return newImg;
 }
 
+SDL_Surface* SDLGame::CreateVerticallyFlippedImage(SDL_Surface* img)
+{
+    auto newImg = rotozoomSurfaceXY(img, 0, 1, -1, SMOOTHING_OFF);
+    createdImages.push_back(newImg);
+    return newImg;
+}
+
 void SDLGame::DrawRect(int x, int y, int width, int height, SDLColor color, RECTANGLE_TYPE rectangleType, int rad)
 {
     switch (rectangleType)
     {
     case RECTANGLE_TYPE::BOX:
-        rectangleColor(hw_surface, x, y, x + width, y + height, color.ReversedUInt());
+        rectangleColor(surface_buffer, x, y, x + width, y + height, color.ReversedUInt());
         break;
     case RECTANGLE_TYPE::FILLED:
-        boxColor(hw_surface, x, y, x + width, y + height, color.ReversedUInt());
+        boxColor(surface_buffer, x, y, x + width, y + height, color.ReversedUInt());
         break;
     case RECTANGLE_TYPE::BOX_ROUNDED:
-        roundedRectangleColor(hw_surface, x, y, x + width, y + height, rad, color.ReversedUInt());
+        roundedRectangleColor(surface_buffer, x, y, x + width, y + height, rad, color.ReversedUInt());
         break;
     case RECTANGLE_TYPE::FILLED_ROUNDED:
-        roundedBoxColor(hw_surface, x, y, x + width, y + height, rad, color.ReversedUInt());
+        roundedBoxColor(surface_buffer, x, y, x + width, y + height, rad, color.ReversedUInt());
         break;
     }
 }
 
 void SDLGame::DrawPoint(int x, int y, SDLColor color)
 {
-    pixelColor(hw_surface, x, y, color.ReversedUInt());
+    pixelColor(surface_buffer, x, y, color.ReversedUInt());
 }
 
 void SDLGame::FrameRateDelay()
@@ -189,7 +225,7 @@ void SDLGame::FrameRateDelay()
 
 SDL_Surface* SDLGame::GetSurface()
 {
-    return hw_surface;
+    return surface_buffer;
 }
 
 TTF_Font* SDLGame::LoadFont(const char* szFont, int fontSize)
@@ -217,4 +253,14 @@ SDL_Surface* SDLGame::CreateTextSurface(TTF_Font* font, const char* szText, SDL_
 void SDLGame::ResetKeys()
 {
     memset(&keys, 0, sizeof(keys));
+}
+
+int SDLGame::GetWidth()
+{
+    return screen_width;
+}
+
+int SDLGame::GetHeight()
+{
+    return screen_height;
 }

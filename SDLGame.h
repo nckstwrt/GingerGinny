@@ -11,6 +11,7 @@
 #include "SDLFont.h"
 #include <map>
 #include <string>
+#include <cstring>
 using namespace std;
 
 enum class RECTANGLE_TYPE
@@ -27,7 +28,7 @@ public:
     SDLGame();
     ~SDLGame();
 
-    bool SetupScreen(int width, int height, bool fullScreen);
+    bool SetupScreen(int width, int height, bool fullScreen, bool useHWSurface = true, bool upsideDown = false);
     void ClearScreen();
     void ClearScreen(SDLColor c);
     void FlipScreen();
@@ -39,6 +40,7 @@ public:
     void BlitImage(SDL_Surface* img, int srcX, int srcY, int w, int h, int x, int y);
     SDL_Surface* GetImageFromSheet(SDL_Surface* img, int srcX, int srcY, int w, int h);
     SDL_Surface* CreateHorizontallyFlippedImage(SDL_Surface* img);
+    SDL_Surface* CreateVerticallyFlippedImage(SDL_Surface* img);
     void DrawRect(int x, int y, int width, int height, SDLColor color, RECTANGLE_TYPE rectangleType = RECTANGLE_TYPE::FILLED, int rad = 5);
     void DrawPoint(int x, int y, SDLColor color);
     void FrameRateDelay();
@@ -47,11 +49,17 @@ public:
     void OutputText(TTF_Font* font, const char* szText, SDLColor col, int x, int y, int maxWidth);
     SDL_Surface* CreateTextSurface(TTF_Font* font, const char* szText, SDL_Color col);
     void ResetKeys();
+    int GetWidth();
+    int GetHeight();
 
     bool keys[SDLK_LAST];
     int lastKeyPressed;
 private:
-    SDL_Surface* hw_surface;
+    int screen_width;
+    int screen_height;
+    bool upsideDown;
+    SDL_Surface* surface_buffer;
+    SDL_Surface* real_surface;
     SDLFont fonts;
     FPSmanager fpsManager;
     map<string, SDL_Surface*> imageMap;

@@ -238,18 +238,18 @@ void World::Update()
     sort(monsters.begin(), monsters.end(), [](const shared_ptr<Monster> a, const shared_ptr<Monster> b) -> bool { return a->y+a->height < b->y+b->height; });
 
     // Update the Viewpoint Offset based on who the camera is following (horizontal)
-    if (PixelXToDisplayPixelX(pCameraFollow->x) < (SCREEN_WIDTH / 4))
-        offsetX -= (SCREEN_WIDTH / 4) - PixelXToDisplayPixelX(pCameraFollow->x);
-    if (PixelXToDisplayPixelX(pCameraFollow->x + pCameraFollow->width) > ((SCREEN_WIDTH / 4) * 3))
-        offsetX += PixelXToDisplayPixelX(pCameraFollow->x + pCameraFollow->width) - ((SCREEN_WIDTH / 4) * 3);
+    if (PixelXToDisplayPixelX(pCameraFollow->x) < (pGame->GetWidth() / 4))
+        offsetX -= (pGame->GetWidth() / 4) - PixelXToDisplayPixelX(pCameraFollow->x);
+    if (PixelXToDisplayPixelX(pCameraFollow->x + pCameraFollow->width) > ((pGame->GetWidth() / 4) * 3))
+        offsetX += PixelXToDisplayPixelX(pCameraFollow->x + pCameraFollow->width) - ((pGame->GetWidth() / 4) * 3);
     if (offsetX < 0)
         offsetX = 0;
 
     // Now update for the vertical
-    if (PixelYToDisplayPixelY(pCameraFollow->y) < (SCREEN_HEIGHT / 4))
-        offsetY -= (SCREEN_HEIGHT / 4) - PixelYToDisplayPixelY(pCameraFollow->y);
-    if (PixelYToDisplayPixelY(pCameraFollow->y + pCameraFollow->height) > ((SCREEN_HEIGHT / 4) * 3))
-        offsetY += PixelYToDisplayPixelY(pCameraFollow->y + pCameraFollow->height) - ((SCREEN_HEIGHT / 4) * 3);
+    if (PixelYToDisplayPixelY(pCameraFollow->y) < (pGame->GetHeight() / 4))
+        offsetY -= (pGame->GetHeight() / 4) - PixelYToDisplayPixelY(pCameraFollow->y);
+    if (PixelYToDisplayPixelY(pCameraFollow->y + pCameraFollow->height) > ((pGame->GetHeight() / 4) * 3))
+        offsetY += PixelYToDisplayPixelY(pCameraFollow->y + pCameraFollow->height) - ((pGame->GetHeight() / 4) * 3);
     if (offsetY < 0)
         offsetY = 0;
 }
@@ -259,9 +259,9 @@ void World::DrawTiles(bool bottomTiles)
     int startTileX = offsetX / TILE_SIZE;
     int startTileY = offsetY / TILE_SIZE;
 
-    for (int y = 0; y < (SCREEN_HEIGHT / TILE_SIZE) + 1; y++)
+    for (int y = 0; y < (pGame->GetHeight() / TILE_SIZE) + 1; y++)
     {
-        for (int x = 0; x < (SCREEN_WIDTH / TILE_SIZE) + 1; x++)
+        for (int x = 0; x < (pGame->GetWidth() / TILE_SIZE) + 1; x++)
         {
             if (startTileY + y < tileMapHeight && startTileX + x < tileMapWidth)
             {
@@ -436,15 +436,15 @@ void World::MonsterAttack(shared_ptr<Monster> pMonster)
 int World::DrawTextBox(TTF_Font* font, const char* szText, SDLColor textColor)
 {
     int ret = 0;
-    int textBoxHeightStart = SCREEN_HEIGHT - 70;
+    int textBoxHeightStart = pGame->GetHeight() - 70;
     int outerIndent = 1;
     int innerIndent = 4;
     SDLColor backGroundColor = SDLColor(200, 200, 200);
     SDLColor triangeColor = SDLColor(30, 30, 30);
-    pGame->DrawRect(outerIndent, textBoxHeightStart, SCREEN_WIDTH - (2 * outerIndent), SCREEN_HEIGHT - (textBoxHeightStart + outerIndent), backGroundColor, RECTANGLE_TYPE::FILLED_ROUNDED, 5);
-    pGame->DrawRect(outerIndent + innerIndent, textBoxHeightStart + innerIndent, SCREEN_WIDTH - (2 * (outerIndent + innerIndent)), SCREEN_HEIGHT - (textBoxHeightStart + innerIndent + outerIndent + innerIndent), SDLColor(127, 127, 127), RECTANGLE_TYPE::BOX_ROUNDED, 5);
-    pGame->OutputText(font, szText, textColor, (outerIndent + (innerIndent * 2) + 2), textBoxHeightStart + outerIndent + innerIndent, SCREEN_WIDTH - ((outerIndent + (innerIndent * 2) + 2)));
-    filledTrigonColor(pGame->GetSurface(), SCREEN_WIDTH - 20, SCREEN_HEIGHT - 18, SCREEN_WIDTH - 10, SCREEN_HEIGHT - 18, SCREEN_WIDTH - 15, SCREEN_HEIGHT - 10, triangeColor.ReversedUInt());
+    pGame->DrawRect(outerIndent, textBoxHeightStart, pGame->GetWidth() - (2 * outerIndent), pGame->GetHeight() - (textBoxHeightStart + outerIndent), backGroundColor, RECTANGLE_TYPE::FILLED_ROUNDED, 5);
+    pGame->DrawRect(outerIndent + innerIndent, textBoxHeightStart + innerIndent, pGame->GetWidth() - (2 * (outerIndent + innerIndent)), pGame->GetHeight() - (textBoxHeightStart + innerIndent + outerIndent + innerIndent), SDLColor(127, 127, 127), RECTANGLE_TYPE::BOX_ROUNDED, 5);
+    pGame->OutputText(font, szText, textColor, (outerIndent + (innerIndent * 2) + 2), textBoxHeightStart + outerIndent + innerIndent, pGame->GetWidth() - ((outerIndent + (innerIndent * 2) + 2)));
+    filledTrigonColor(pGame->GetSurface(), pGame->GetWidth() - 20, pGame->GetHeight() - 18, pGame->GetWidth() - 10, pGame->GetHeight() - 18, pGame->GetWidth() - 15, pGame->GetHeight() - 10, triangeColor.ReversedUInt());
 
     Uint32 counter = 0;
     while (true)
@@ -453,7 +453,7 @@ int World::DrawTextBox(TTF_Font* font, const char* szText, SDLColor textColor)
             triangeColor = backGroundColor;
         else
             triangeColor = SDLColor(30, 30, 30);
-        filledTrigonColor(pGame->GetSurface(), SCREEN_WIDTH - 20, SCREEN_HEIGHT - 18, SCREEN_WIDTH - 10, SCREEN_HEIGHT - 18, SCREEN_WIDTH - 15, SCREEN_HEIGHT - 10, triangeColor.ReversedUInt());
+        filledTrigonColor(pGame->GetSurface(), pGame->GetWidth() - 20, pGame->GetHeight() - 18, pGame->GetWidth() - 10, pGame->GetHeight() - 18, pGame->GetWidth() - 15, pGame->GetHeight() - 10, triangeColor.ReversedUInt());
         
         if (pGame->PollEvents().type == SDL_QUIT || pGame->keys[SDLK_q] || pGame->keys[SDLK_ESCAPE])
         {
@@ -461,7 +461,7 @@ int World::DrawTextBox(TTF_Font* font, const char* szText, SDLColor textColor)
             break;
         }
 
-        if (pGame->keys[SDLK_a] || pGame->keys[SDLK_b] || pGame->keys[SDLK_x] || pGame->keys[SDLK_y] || pGame->keys[SDLK_s])
+        if (pGame->keys[SDLK_a] || pGame->keys[SDLK_b] || pGame->keys[SDLK_x] || pGame->keys[SDLK_y] || pGame->keys[SDLK_s] || pGame->keys[SDLK_SPACE] || pGame->keys[SDLK_LCTRL])
             break;
 
         pGame->FlipScreen();

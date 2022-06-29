@@ -2,8 +2,7 @@
 
 Animation::Animation() :
     currentFrame(0),
-    currentImage(0),
-    animationDelays(NULL)
+    currentImage(0)
 {
 }
 

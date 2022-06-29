@@ -9,10 +9,9 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <cstring>
 using namespace std;
 
-#define SCREEN_WIDTH 240
-#define SCREEN_HEIGHT 240
 #define TILE_SIZE 16
 #define MAX_TILE_PER_SQUARE 3
 #define GINNY_COLOR SDLColor(198, 56, 0)

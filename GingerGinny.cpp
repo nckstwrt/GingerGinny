@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <time.h>
 #include "SDLGame.h"
 #include "SDLColor.h"
@@ -5,10 +6,35 @@
 #include "World.h"
 #include <SDL/SDL_mixer.h>
 
-//#define PLAY_MUSIC
+#define PLAY_MUSIC
+#define TMNT_MUSIC_FILE "tmnt.wav"
+#define HP_MUSIC_FILE "hp.wav"
+
+FILE* fout;
+
+void log(const char* fmt, ...)
+{
+    char printString[1000];
+    va_list argp;
+    va_start(argp, fmt);
+    vsprintf(printString, fmt, argp);
+    va_end(argp);
+    fprintf(fout, printString);
+    fflush(fout);
+}
 
 int main(int argc, char* argv[])
 {
+    fout = fopen("logfile.txt", "wt");
+    fprintf(fout, "Hello World!\n");
+    fflush(fout);
+
+    int screen_width = 240;
+    int screen_height = 240;
+    bool fullScreen = false;
+    bool useHWSurface = true;
+    bool upsideDown = false;
+
     srand((unsigned int)time(NULL));
 
     SDLGame Game;
@@ -16,17 +42,39 @@ int main(int argc, char* argv[])
     SDLFont fonts;
 
     // Harry Potter Music :)
-    Mix_Init(MIX_INIT_OGG | MIX_INIT_MP3);
+    int mix_init_ret = Mix_Init(MIX_INIT_OGG | MIX_INIT_MP3);
+    log("mix_init_ret: %d\n", mix_init_ret);
+
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 1, 4096) == -1)
         return -1;
+    Mix_Volume(-1, MIX_MAX_VOLUME);
     Mix_Music* musicTMNT = NULL;
 #ifdef PLAY_MUSIC
-    musicTMNT = Mix_LoadMUS("tmnt.ogg");
+    musicTMNT = Mix_LoadMUS(TMNT_MUSIC_FILE);
 #endif
     if (musicTMNT != NULL)
-        Mix_PlayMusic(musicTMNT, 0);
+    {
+        if (Mix_PlayMusic(musicTMNT, 0) == -1)
+        {
+            log("Mix_PlayMusic: %s\n", Mix_GetError());
+        }
+    }
+    else
+    {
+        log("Could not find or load tmnt.ogg!\n");
+        log("Mix_LoadMUS: %s\n", Mix_GetError());
+    }
 
-    Game.SetupScreen(SCREEN_WIDTH, SCREEN_HEIGHT, false);
+    if (argc == 3)
+    {
+        screen_width = atoi(argv[1]);
+        screen_height = atoi(argv[2]);
+        fullScreen = false;
+        useHWSurface = false;
+        upsideDown = true;
+    }
+
+    Game.SetupScreen(screen_width, screen_height, fullScreen, useHWSurface, upsideDown);
 
     SDL_Surface* hw_surface = Game.GetSurface();
 
@@ -116,12 +164,12 @@ int main(int argc, char* argv[])
     {
         Game.ClearScreen(SDLColor(34,34,34));
 
-        Game.BlitImage(pTitleScreen, 0, 25);
+        Game.BlitImage(pTitleScreen, (Game.GetWidth() / 2) - (pTitleScreen->w / 2), (Game.GetHeight() / 5));
 
         if (((counter++) % 4) == 0)
             color = SDLColor(rand() % 255, rand() % 255, rand() % 255);
         SDL_Surface* pressStart = Game.CreateTextSurface(ParryHotter, "Press Start", color);
-        Game.BlitImage(pressStart, SCREEN_WIDTH / 2 - pressStart->w / 2, 140);
+        Game.BlitImage(pressStart, Game.GetWidth() / 2 - pressStart->w / 2, (Game.GetHeight() / 3) * 2);
 
         if (Game.PollEvents().type == SDL_QUIT || Game.keys[SDLK_q] || Game.keys[SDLK_ESCAPE])
         {
@@ -144,7 +192,7 @@ int main(int argc, char* argv[])
         SDL_Delay(50);
     Mix_Music* musicHP = NULL;
 #ifdef PLAY_MUSIC
-    musicHP = Mix_LoadMUS("hp.ogg");
+    musicHP = Mix_LoadMUS(HP_MUSIC_FILE);
     if (musicHP == NULL)
         printf("HP Music Error: %s\n", Mix_GetError());
 #endif
@@ -178,10 +226,22 @@ int main(int argc, char* argv[])
             {
                 World.MonsterMove(World.pCameraFollow, DIRECTION::Down);
             }
-            if (Game.keys[SDLK_a])
+
+            // https://steward-fu.github.io/website/handheld/miyoo-mini/sdlkey.htm
+            if (Game.keys[SDLK_a] || Game.keys[SDLK_SPACE] || Game.keys[SDLK_LCTRL])
             {
                 World.MonsterAttack(World.pCameraFollow);
             }
+
+            /*
+            for (int k = 0; k < 323; k++)
+            {
+                if (Game.keys[k] != 0)
+                {
+                    fprintf(fout, "Key Down: %d", k);
+                    fflush(fout);
+                }
+            }*/
         }
         if (Game.keys[SDLK_p])
         {
