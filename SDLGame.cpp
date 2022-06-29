@@ -65,11 +65,28 @@ void SDLGame::FlipScreen()
 {
     if (upsideDown)
     {
+        SDL_LockSurface(surface_buffer);
+        SDL_LockSurface(real_surface);
+        
+        int pixelCountPerScreen = (surface_buffer->h * surface_buffer->pitch) / 4;
+        unsigned int* srcPtr = ((unsigned int*)surface_buffer->pixels) + pixelCountPerScreen;
+        unsigned int* dstPtr = ((unsigned int*)real_surface->pixels);
+        for (int i = 0; i < pixelCountPerScreen; ++i)
+        {
+            *dstPtr = *srcPtr;
+            ++dstPtr;
+            --srcPtr;
+        }
+
+        SDL_UnlockSurface(surface_buffer);
+        SDL_UnlockSurface(real_surface);
+        SDL_Flip(real_surface);
+        /*
         SDL_Surface* flippedSurface = rotozoomSurfaceXY(surface_buffer, 0, -1, -1, SMOOTHING_OFF);
         SDL_FillRect(real_surface, NULL, 0x000000);
         SDL_BlitSurface(flippedSurface, NULL, real_surface, NULL);
         SDL_Flip(real_surface);
-        SDL_FreeSurface(flippedSurface);
+        SDL_FreeSurface(flippedSurface);*/
     }
     else
     { 
