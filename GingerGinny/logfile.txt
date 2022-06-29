@@ -1,1 +1,4 @@
 Hello World!
+mix_init_ret: 12
+Could not find or load tmnt.ogg!
+Mix_LoadMUS: Couldn't open 'tmnt.wav'
